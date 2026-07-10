@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>LockdSync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,6 +17,83 @@
         <label>Username: Unknown</label>
         <div>No chats were made yet.</div>
         <!-- Homepage content goes here -->
+         <!-- Mobile Screen Container -->
+        <div class="relative w-full max-w-sm h-[800px] bg-white rounded-[3rem] shadow-2xl border-8 border-black overflow-hidden flex flex-col">
+        
+            <!-- Header -->
+            <header class="flex justify-between items-center px-6 py-4 border-b border-gray-200 mt-6">
+                <!-- Invisible spacer to perfectly center the title -->
+                <div class="w-6"></div>
+                
+                <h1 class="text-lg font-semibold text-black">Home</h1>
+                
+                <!-- Notification Bell -->
+                <a href="notification.html" class="text-gray-600 hover:text-black transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                    </svg>
+                </a>
+            </header>
+
+            <!-- Main Content: Cards -->
+            <main class="flex-1 px-4 py-6 space-y-4 overflow-y-auto pb-24">
+                
+                <!-- Card 1 -->
+                <a href="hangouthome.html" class="block border border-gray-200 rounded-2xl p-5 hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-6">
+                        <h2 class="text-lg font-semibold text-black">Hangout #</h2>
+                        <span class="text-sm font-medium text-gray-700">$15</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <!-- Avatars -->
+                        <div class="flex -space-x-2">
+                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="Avatar 1">
+                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=12" alt="Avatar 2">
+                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=13" alt="Avatar 3">
+                            <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[10px] font-medium text-gray-500">
+                                +1
+                            </div>
+                        </div>
+                        <!-- Date -->
+                        <span class="text-xs font-medium text-gray-500">mm/dd/yyyy</span>
+                    </div>
+                </a>
+
+                <!-- Card 2 -->
+                <a href="hangouthome.html" class="block border border-gray-200 rounded-2xl p-5 hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-6">
+                        <h2 class="text-lg font-semibold text-black">Hangout #2</h2>
+                        <span class="text-sm font-medium text-gray-700">$90</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <!-- Avatars -->
+                        <div class="flex -space-x-2">
+                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="Avatar 1">
+                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=12" alt="Avatar 2">
+                            <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=13" alt="Avatar 3">
+                            <div class="w-8 h-8 rounded-full border-2 border-white bg-gray-50 flex items-center justify-center text-[10px] font-medium text-gray-500">
+                                +1
+                            </div>
+                        </div>
+                        <!-- Date -->
+                        <span class="text-xs font-medium text-gray-500">mm/dd/yyyy</span>
+                    </div>
+                </a>
+                
+            </main>
+
+            <!-- Floating Action Button (Plus Sign) -->
+            <div class="absolute bottom-10 left-0 right-0 flex justify-center pb-6 bg-gradient-to-t from-white to-transparent pt-10 pointer-events-none">
+                <a href="createhangout.html" class="w-12 h-12 bg-white border-2 border-gray-400 rounded-full flex items-center justify-center text-gray-500 hover:text-black hover:border-black transition pointer-events-auto shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </a>
+            </div>
+
+        </div>
          <!--Navigation bar-->
         <nav class="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/90 backdrop-blur">
             <ul class="mx-auto flex max-w-3xl items-center justify-around px-3 py-3">
@@ -32,19 +110,19 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex flex-col items-center text-sm font-medium text-slate-600 hover:text-blue-600">
+                    <a href="profile.html" class="flex flex-col items-center text-sm font-medium text-slate-600 hover:text-blue-600">
                         <span class="text-lg">👤</span>
                         <span>Profile</span>
                     </a>
                 </li>
                 <li>
-                    <a href="schedule.html" class="flex flex-col items-center text-sm font-medium text-blue-600">
+                    <a href="calendar.html" class="flex flex-col items-center text-sm font-medium text-blue-600">
                         <span class="text-lg">📅</span>
                         <span>Calendar</span>
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex flex-col items-center text-sm font-medium text-slate-600 hover:text-blue-600">
+                    <a href="settings.html" class="flex flex-col items-center text-sm font-medium text-slate-600 hover:text-blue-600">
                         <span class="text-lg">⚙️</span>
                         <span>Settings</span>
                     </a>
