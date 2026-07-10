@@ -6,7 +6,49 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Document</title>
 </head>
-<body>
+<body class="bg-white font-sans text-black">
+
+    <div class="max-w-xl mx-auto pb-12">
+        
+        <!-- Header Section -->
+        <div class="flex items-center px-8 pt-12 pb-5 gap-5">
+            <div class="w-[90px] h-[90px] bg-[#d9d9d9] rounded-full flex justify-center items-end overflow-hidden shrink-0">
+                <!-- Default User SVG Icon -->
+                <svg viewBox="0 0 24 24" class="w-20 h-20 fill-white -mb-2.5" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4"></circle>
+                    <path d="M4 22c0-4 4-8 8-8s8 4 8 8"></path>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-[18px] font-medium mb-1.5">You</h1>
+                <p class="text-[14px] font-semibold text-[#a0a0a0]">You@gmail.com</p>
+            </div>
+        </div>
+
+        <!-- Profile Info Card -->
+        <div class="bg-[#d9d9d9] rounded-[24px] mx-5 mt-4 px-6 py-5">
+            <div class="py-3 text-[14px] font-semibold">Insert Birthday</div>
+            <div class="py-3 text-[14px] font-semibold">Insert Favorite food</div>
+            <div class="py-3 text-[14px] font-semibold">Insert Friend most hung out with</div>
+            <div class="py-3 text-[14px] font-semibold">Insert How many events they missed</div>
+            <div class="py-3 text-[14px] font-semibold">Insert What favorite band they like</div>
+        </div>
+
+        <!-- Customization Card -->
+        <div class="bg-[#d9d9d9] rounded-[24px] mx-5 mt-3.5 px-6 py-2.5">
+            <div class="text-center py-3.5 text-[15px] font-normal">Customize</div>
+            <div class="text-center py-3.5 text-[15px] font-normal">Message Color</div>
+            <div class="text-center py-3.5 text-[15px] font-normal">Home Color</div>
+        </div>
+
+        <!-- Sign Out Button -->
+        <div class="px-5 mt-12">
+            <button class="block w-full py-3 bg-[#e0e0e0] text-[#ff3b30] text-[14px] rounded-[20px] text-center hover:bg-gray-300 transition duration-150">
+                Sign Out
+            </button>
+        </div>
+        
+    </div>
      <!--Navigation bar-->
         <nav class="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white/90 backdrop-blur">
             <ul class="mx-auto flex max-w-3xl items-center justify-around px-3 py-3">
