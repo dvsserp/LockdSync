@@ -24,3 +24,35 @@ header {
 @media (max-width: 800px) {
     .container { flex-direction: column }
 }
+
+/* Calendar card styles */
+.calendar-card{
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
+    max-width: 480px;
+}
+.calendar-controls{ display:flex; align-items:center; gap:12px; justify-content:flex-start }
+.calendar-controls .icon-btn{ background:transparent; border:1px solid #eee; padding:8px 10px; border-radius:8px }
+.calendar-controls .selects{ display:flex; gap:8px; align-items:center }
+.calendar-controls select{ padding:8px 10px; border-radius:8px; border:1px solid #eee; background:#fff }
+
+.calendar-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:12px }
+.calendar-grid .weekday{ color:#9aa0a6; text-align:center; font-size:13px }
+.day{ min-height:44px; display:flex; align-items:center; justify-content:center; border-radius:8px; cursor:pointer; position:relative }
+.day.empty{ background:transparent }
+.day.range-pink{ background: #f9c8c8; color:#6b2b2b }
+.day.range-green{ background: #d5df9b; color:#213516 }
+.day.selected{ background:#6b2b2b; color:white; border-radius:10px; width:38px; height:38px; margin:auto }
+
+.legend{ max-width:480px }
+.legend-item{ display:flex; gap:16px; align-items:center; margin-bottom:18px }
+.swatch{ width:56px; height:56px; border-radius:4px; display:inline-block }
+.swatch.pink{ background:#f9c8c8 }
+.swatch.green{ background:#d5df9b }
+
+.bottom-nav{ position:fixed; left:0; right:0; bottom:12px; display:flex; gap:10px; justify-content:space-around; max-width:640px; margin:0 auto }
+.nav-item{ display:flex; flex-direction:column; align-items:center; color:#9aa0a6 }
+.nav-item.active{ color:#222 }
+.nav-label{ font-size:12px; margin-top:6px }
