@@ -53,3 +53,52 @@ async function loadHangouts() {
 
 // 4. Run the function when the page loads
 loadHangouts();
+
+// --- CREATE HANGOUT LOGIC ---
+
+// Find the form element by its ID
+const createForm = document.getElementById('create-hangout-form');
+
+// Only run this code if the form exists on the current page
+if (createForm) {
+    createForm.addEventListener('submit', async function(event) {
+        // Prevent the browser's default form submission (which reloads the page)
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-btn');
+        const errorText = document.getElementById('form-error');
+        
+        // Temporarily change the button state so the user knows it's loading
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        errorText.classList.add('hidden');
+        
+        // Grab the values typed into the inputs
+        const nameValue = document.getElementById('hangout-name').value;
+        const priceValue = document.getElementById('hangout-price').value;
+        const dateValue = document.getElementById('hangout-date').value;
+        
+        // Insert the new data into the Supabase 'hangouts' table
+        const { error } = await supabase
+            .from('hangouts')
+            .insert([
+                { 
+                    hangout_name: nameValue, 
+                    average_price: parseFloat(priceValue), // Convert string to a decimal number
+                    hangout_date: dateValue 
+                }
+            ]);
+            
+        if (error) {
+            console.error('Error inserting data:', error);
+            // Display the error text and reset the button
+            errorText.textContent = 'Failed to save hangout. Please try again.';
+            errorText.classList.remove('hidden');
+            submitBtn.textContent = 'Create Hangout';
+            submitBtn.disabled = false;
+        } else {
+            // Success! Send the user straight back to the homepage
+            window.location.href = 'index.html';
+        }
+    });
+}
