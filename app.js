@@ -24,19 +24,24 @@ async function loadHangouts() {
     hangouts.forEach(hangout => {
         // Create the card HTML, inserting the dynamic data
         const cardHTML = `
-        <a href="hangouthome.html" class="block border border-gray-200 rounded-2xl p-5 hover:shadow-md transition">
+        <a href="hangouthome.html" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white">
             <div class="flex justify-between items-start mb-6">
-                <h2 class="text-lg font-semibold text-black">${hangout.hangout_name}</h2>
-                <span class="text-sm font-medium text-gray-700">$${hangout.average_price}</span>
+                <h2 class="text-base font-semibold text-black">${hangout.hangout_name}</h2>
+                <span class="text-xs font-medium text-gray-500">$${hangout.average_price}</span>
             </div>
-            
+
             <div class="flex justify-between items-center">
-                <!-- Avatars (Hardcoded for now) -->
+                <!-- Overlapping Avatars matching Figma -->
                 <div class="flex -space-x-2">
-                    <img class="w-8 h-8 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="Avatar 1">
+                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="User">
+                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=12" alt="User">
+                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=13" alt="User">
+                    <div class="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[9px] font-medium text-gray-500">
+                        +1
+                    </div>
                 </div>
                 <!-- Date -->
-                <span class="text-xs font-medium text-gray-500">${hangout.hangout_date}</span>
+                <span class="text-[10px] font-medium text-gray-400">${hangout.hangout_date}</span>
             </div>
         </a>
         `;
