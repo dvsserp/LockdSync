@@ -55,4 +55,7 @@ header {
 .nav-item{ display:flex; flex-direction:column; align-items:center; color:#9aa0a6 }
 .nav-item.active{ color:#222 }
 .nav-label{ font-size:12px; margin-top:6px }
+<<<<<<< HEAD
 
+=======
+>>>>>>> AnthonyBranch
