@@ -1,5 +1,5 @@
 // 1. Initialize Supabase
-const SUPABASE_URL = 'https://culmoystfpiyiudtfpzw.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://culmoystfpiyiudtfpzw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1bG1veXN0ZnBpeWl1ZHRmcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDU2NzIsImV4cCI6MjA5OTI4MTY3Mn0.JedwAdBLb23BUc4Xecs_UXh01Jo6cxsaHw55PSQIe80';
 
 // Initialize the client using the window.supabase object from the CDN
