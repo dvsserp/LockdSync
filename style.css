@@ -17,41 +17,9 @@ header {
     display: flex;
     gap: 20px;
     padding: 20px;
+    
 }
-.messaging {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 8px;
-    padding: 12px;
-    min-height: 60vh;
-}
-.messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 8px;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    margin-bottom: 12px;
-}
-.message {
-    padding: 8px 10px;
-    margin-bottom: 8px;
-    border-radius: 6px;
-    background: #eef6ff;
-}
-.composer { display:flex; gap:8px }
-.composer input { flex:1; padding:8px; border-radius:6px; border:1px solid #ddd }
-.composer button { padding:8px 12px; border:none; background:#0b5cff; color:white; border-radius:6px }
-.calendar {
-    flex: 1;
-    background: white;
-    padding: 12px;
-    border-radius: 8px;
-    min-height: 60vh;
-}
-.selected-date { margin-top: 12px; font-weight: 600 }
+
 
 @media (max-width: 800px) {
     .container { flex-direction: column }
