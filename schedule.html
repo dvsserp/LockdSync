@@ -6,7 +6,59 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <title>Schedule</title>
 </head>
-<body class="min-h-screen bg-slate-100 text-slate-800">
+<body class="bg-white font-sans text-gray-900">
+
+  <!-- Main Full-Width Container -->
+  <div class="w-full min-h-screen flex flex-col">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-center relative px-4 py-6">
+      <a href="hangouthome.html" class="absolute left-4 bg-gray-800 text-gray-100 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition inline-block">
+        Back
+      </a>
+      <h1 class="text-2xl font-bold text-black">July 10</h1>
+    </div>
+
+    <!-- Black Divider -->
+    <hr class="border-t border-black mb-6">
+
+    <!-- Activity Cards Container -->
+    <div class="px-4 space-y-4 flex-grow">
+      
+      <!-- Card 1: Lunch -->
+      <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+          <span class="text-lg text-gray-900">Lunch</span>
+          <span class="text-lg text-gray-900">$5</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-base text-gray-900">12 pm</span>
+          <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">McDonalds</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Ice Skating -->
+      <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+          <span class="text-lg text-gray-900">Ice Skating</span>
+          <span class="text-lg text-gray-900">$10</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-base text-gray-900">3 pm</span>
+          <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">World Ice Arena</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Add Activity Button -->
+    <div class="pb-10 pt-6 flex justify-center">
+      <button class="bg-gray-800 text-gray-100 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition shadow-md">
+        Add activity
+      </button>
+    </div>
+
+  </div>
     <main class="p-6 pb-24">
         <h1 class="text-2xl font-semibold">Schedule</h1>
         <p class="mt-2 text-slate-600">Your upcoming plans and activities.</p>
