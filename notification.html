@@ -6,13 +6,13 @@
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <title>Notifications Hub</title>
     </head>
-    <body class="p-6 bg-gray-100 min-h-screen font-sans relative">
+    <body class="p-6 bg-gray-100 min-h-screen font-sans relative pb-24">
         <div class="flex justify-between items-center mb-6">
             <a
-                href="calendar.html"
-                class="inline-block bg-[#2E2E2E] hover:bg-black transition text-white px-5 py-2 rounded-lg text-sm font-medium shadow-sm"
+                href="index.html"
+                class="inline-block bg-gray-800 hover:bg-black transition text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm"
             >
-                Back to Calendar
+                Back
             </a>
             <button
                 onclick="toggleDevTools()"
@@ -114,6 +114,13 @@
 
         <div id="notification-zone" class="max-w-3xl mx-auto mt-8"></div>
 
+        <a
+            href="calendar.html"
+            class="fixed bottom-6 right-6 z-50 inline-block bg-[#2E2E2E] hover:bg-black transition text-white px-5 py-2.5 rounded-lg text-sm font-medium shadow-md hover:shadow-lg"
+        >
+            Back to Calendar
+        </a>
+
         <script>
             const MONTH_LABELS = [
                 'Jan',
@@ -133,8 +140,6 @@
             function initDevToolsDateDefaults() {
                 const now = new Date();
                 const monthSelect = document.getElementById('dev-target-month');
-
-                // Build options for all 12 months dynamically
                 monthSelect.innerHTML = '';
                 MONTH_LABELS.forEach((label, index) => {
                     const opt = document.createElement('option');
@@ -145,8 +150,6 @@
                     }
                     monthSelect.appendChild(opt);
                 });
-
-                // Pre-populate input configurations with live system dates
                 document.getElementById('dev-target-day').value = now.getDate();
                 document.getElementById('dev-target-year').value =
                     now.getFullYear();
@@ -266,12 +269,9 @@
                     document.getElementById('dev-target-year').value,
                 );
 
-                // Handle string macro transformation dynamically relative to today's date
                 if (dateText.toLowerCase() === 'tomorrow') {
                     const tomorrowsDate = new Date();
                     tomorrowsDate.setDate(tomorrowsDate.getDate() + 1);
-
-                    // Only apply auto-override if form inputs haven't been manually adjusted away from current day presets
                     const checkDay = new Date();
                     if (targetDay === checkDay.getDate()) {
                         targetDay = tomorrowsDate.getDate();
@@ -316,8 +316,6 @@
                 let currentDatabase =
                     JSON.parse(localStorage.getItem('calendarActivities')) ||
                     [];
-
-                // Clear any duplicate hangout tags for this day to prevent entry stacking
                 currentDatabase = currentDatabase.filter(
                     (ev) =>
                         !(
