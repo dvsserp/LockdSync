@@ -19,8 +19,8 @@
                 -webkit-appearance: none;
                 background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234b5563' stroke-width='2.5'><path stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/></svg>");
                 background-repeat: no-repeat;
-                background-position: right 8px center;
-                background-size: 12px;
+                background-position: right 6px center;
+                background-size: 10px;
             }
         </style>
     </head>
@@ -59,12 +59,12 @@
                                 <select
                                     id="calendar-month"
                                     onchange="handleDropdownChange()"
-                                    class="custom-select border border-gray-300 rounded-md pl-3 pr-7 py-1 text-[15px] text-gray-800 cursor-pointer bg-white hover:bg-gray-50 focus:outline-none"
+                                    class="custom-select border border-gray-300 rounded-md pl-3 pr-6 py-1 text-[15px] text-gray-800 cursor-pointer bg-white hover:bg-gray-50 focus:outline-none"
                                 ></select>
                                 <select
                                     id="calendar-year"
                                     onchange="handleDropdownChange()"
-                                    class="custom-select border border-gray-300 rounded-md pl-3 pr-7 py-1 text-[15px] text-gray-800 cursor-pointer bg-white hover:bg-gray-50 focus:outline-none"
+                                    class="custom-select border border-gray-300 rounded-md pl-3 pr-6 py-1 text-[15px] text-gray-800 cursor-pointer bg-white hover:bg-gray-50 focus:outline-none"
                                 ></select>
                             </div>
                             <button
@@ -114,6 +114,7 @@
                         </h2>
                         <div id="day-activities-list" class="space-y-4"></div>
                     </div>
+
                     <div
                         class="border border-gray-100 rounded-[15px] p-4 bg-gray-50 mb-6"
                     >
@@ -145,6 +146,58 @@
                                     </option>
                                 </select>
                             </div>
+
+                            <div
+                                class="space-y-2 bg-white border border-gray-200 rounded p-2.5"
+                            >
+                                <div>
+                                    <label
+                                        class="text-[10px] uppercase font-semibold text-gray-400 block mb-1"
+                                        >Start Time</label
+                                    >
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <select
+                                            id="start-hour"
+                                            class="custom-select border border-gray-300 rounded p-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                        ></select>
+                                        <select
+                                            id="start-min"
+                                            class="custom-select border border-gray-300 rounded p-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                        ></select>
+                                        <select
+                                            id="start-ampm"
+                                            class="custom-select border border-gray-300 rounded p-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                        >
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[10px] uppercase font-semibold text-gray-400 block mb-1"
+                                        >End Time</label
+                                    >
+                                    <div class="grid grid-cols-3 gap-1">
+                                        <select
+                                            id="end-hour"
+                                            class="custom-select border border-gray-300 rounded p-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                        ></select>
+                                        <select
+                                            id="end-min"
+                                            class="custom-select border border-gray-300 rounded p-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                        ></select>
+                                        <select
+                                            id="end-ampm"
+                                            class="custom-select border border-gray-300 rounded p-1 text-xs bg-white focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                        >
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
                             <input
                                 id="form-title"
                                 type="text"
@@ -159,6 +212,7 @@
                             </button>
                         </div>
                     </div>
+
                     <div class="px-2 space-y-4">
                         <div class="flex items-center gap-4">
                             <div
@@ -330,11 +384,9 @@
                 'Nov',
                 'Dec',
             ];
-
-            // Safety bounds rules (July 2026 anchor bottom limit)
             const START_YEAR = 2026;
-            const START_MONTH = 6; // July (0-indexed)
-            const END_YEAR = START_YEAR + 10; // 2036
+            const START_MONTH = 6;
+            const END_YEAR = START_YEAR + 10;
 
             let currentYear = 2026;
             let currentMonth = 6;
@@ -412,6 +464,41 @@
                 },
             ];
 
+            // Populate the dynamic Time Dropdowns
+            function populateTimeDropdowns() {
+                const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+                const minutes = ['00', '15', '30', '45'];
+
+                const startHrSel = document.getElementById('start-hour');
+                const endHrSel = document.getElementById('end-hour');
+                const startMinSel = document.getElementById('start-min');
+                const endMinSel = document.getElementById('end-min');
+
+                startHrSel.innerHTML = '<option value="">Hour</option>';
+                endHrSel.innerHTML = '<option value="">Hour</option>';
+                startMinSel.innerHTML = '<option value="">Min</option>';
+                endMinSel.innerHTML = '<option value="">Min</option>';
+
+                hours.forEach((h) => {
+                    startHrSel.innerHTML += `<option value="${h}">${h}</option>`;
+                    endHrSel.innerHTML += `<option value="${h}">${h}</option>`;
+                });
+
+                minutes.forEach((m) => {
+                    startMinSel.innerHTML += `<option value="${m}">${m}</option>`;
+                    endMinSel.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+            }
+
+            // Convert drop-down outputs into absolute minutes from midnight
+            function convertToAbsoluteMinutes(hr, min, ampm) {
+                let h = parseInt(hr);
+                let m = parseInt(min);
+                if (ampm === 'PM' && h !== 12) h += 12;
+                if (ampm === 'AM' && h === 12) h = 0;
+                return h * 60 + m;
+            }
+
             function initDropdowns() {
                 const yearSelect = document.getElementById('calendar-year');
                 yearSelect.innerHTML = '';
@@ -423,16 +510,15 @@
                 }
                 yearSelect.value = currentYear;
                 updateMonthDropdown(currentMonth);
+                populateTimeDropdowns();
             }
 
             function updateMonthDropdown(monthToSet) {
                 const monthSelect = document.getElementById('calendar-month');
                 const yearSelect = document.getElementById('calendar-year');
                 const selectedYear = parseInt(yearSelect.value);
-
                 monthSelect.innerHTML = '';
 
-                // Limit months based on boundary years
                 const startFrom = selectedYear === START_YEAR ? START_MONTH : 0;
                 const endAt = selectedYear === END_YEAR ? START_MONTH : 11;
 
@@ -443,7 +529,6 @@
                     monthSelect.appendChild(opt);
                 }
 
-                // Enforce safe boundaries on selection
                 if (monthToSet >= startFrom && monthToSet <= endAt) {
                     monthSelect.value = monthToSet;
                 } else if (monthToSet < startFrom) {
@@ -457,7 +542,6 @@
             }
 
             function handleDropdownChange() {
-                // Keep current month selection reference during select swap
                 const targetMonth =
                     parseInt(document.getElementById('calendar-month').value) ||
                     currentMonth;
@@ -480,28 +564,22 @@
                     targetYear--;
                 }
 
-                // Safe proof: Prevent moving past lower bound (July 2026)
                 if (
                     targetYear < START_YEAR ||
                     (targetYear === START_YEAR && targetMonth < START_MONTH)
-                ) {
+                )
                     return;
-                }
-                // Safe proof: Prevent moving past upper bound (July 2036)
                 if (
                     targetYear > END_YEAR ||
                     (targetYear === END_YEAR && targetMonth > START_MONTH)
-                ) {
+                )
                     return;
-                }
 
                 currentYear = targetYear;
                 currentMonth = targetMonth;
 
-                // Update DOM states seamlessly
                 document.getElementById('calendar-year').value = currentYear;
                 updateMonthDropdown(currentMonth);
-
                 generateCalendarGrid();
                 document
                     .getElementById('day-details-container')
@@ -647,17 +725,63 @@
                     document.getElementById('form-status').value;
                 const titleInput = document.getElementById('form-title').value;
 
+                // Get values from new dropdown selections
+                const startH = document.getElementById('start-hour').value;
+                const startM = document.getElementById('start-min').value;
+                const startA = document.getElementById('start-ampm').value;
+
+                const endH = document.getElementById('end-hour').value;
+                const endM = document.getElementById('end-min').value;
+                const endA = document.getElementById('end-ampm').value;
+
                 if (!dayInput || dayInput < 1 || dayInput > 31) {
-                    alert('Please specify a valid calendar day string (1-31).');
+                    alert('Please specify a valid calendar day (1-31).');
                     return;
                 }
+
+                // Enforce mandatory selection across all time dropdown components
+                if (!startH || !startM || !endH || !endM) {
+                    alert(
+                        'Please provide a complete selection for both Start Time and End Time.',
+                    );
+                    return;
+                }
+
+                let totalStartMinutes = convertToAbsoluteMinutes(
+                    startH,
+                    startM,
+                    startA,
+                );
+                let totalEndMinutes = convertToAbsoluteMinutes(
+                    endH,
+                    endM,
+                    endA,
+                );
+
+                // Handle shifts crossing midnight boundary parameters smoothly
+                if (totalEndMinutes <= totalStartMinutes) {
+                    totalEndMinutes += 24 * 60;
+                }
+
+                const totalDurationMinutes =
+                    totalEndMinutes - totalStartMinutes;
+
+                if (totalDurationMinutes > 1440) {
+                    alert(
+                        'The selected activity duration cannot exceed a 24-hour window framework.',
+                    );
+                    return;
+                }
+
+                // Create display string (e.g., "8:00 AM to 3:30 PM")
+                const formattedTimeStr = `${startH}:${startM} ${startA} to ${endH}:${endM} ${endA}`;
 
                 backendActivitiesDataset.push({
                     year: currentYear,
                     month: currentMonth,
                     day: parseInt(dayInput),
                     user: 'Jeffery',
-                    time: 'Flexible Hours',
+                    time: formattedTimeStr,
                     title: titleInput || 'Scheduled Activity Entry',
                     type: statusInput,
                     grade:
@@ -666,8 +790,14 @@
 
                 generateCalendarGrid();
                 selectDay(parseInt(dayInput));
+
+                // Clear input forms back to default placeholder state
                 document.getElementById('form-day').value = '';
                 document.getElementById('form-title').value = '';
+                document.getElementById('start-hour').value = '';
+                document.getElementById('start-min').value = '';
+                document.getElementById('end-hour').value = '';
+                document.getElementById('end-min').value = '';
             }
 
             window.addEventListener('DOMContentLoaded', () => {
