@@ -97,45 +97,72 @@ if (createForm) {
             window.location.href = 'index.html';
         }
     });
-    // --- HANGOUT HOME PAGE LOGIC ---
+} // <--- THIS BRACE MOVED HERE TO CLOSE THE FORM LOGIC!
 
-// Find the title element to confirm we are on the right page
+
+// --- HANGOUT HOME PAGE LOGIC ---
 const hangoutTitleDisplay = document.getElementById('hangout-title');
+const leaveHangoutBtn = document.getElementById('leave-hangout-btn');
 
+// Only run this if we are actually on the hangouthome.html page
 if (hangoutTitleDisplay) {
-    async function setupHangoutPage() {
-        // 1. Check the URL for the ID (e.g., hangouthome.html?id=5)
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentHangoutId = urlParams.get('id');
+    
+    // 1. Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentHangoutId = urlParams.get('id');
 
-        // If someone visits the page without clicking a card, stop them.
-        if (!currentHangoutId) {
-            hangoutTitleDisplay.textContent = 'Hangout Not Found';
-            return;
-        }
-
-        // 2. Fetch the hangout name from Supabase using that ID
-        const { data, error } = await supabase
+    if (!currentHangoutId) {
+        hangoutTitleDisplay.textContent = 'Hangout Not Found';
+    } else {
+        // 2. Fetch the title safely
+        supabase
             .from('hangouts')
             .select('hangout_name')
             .eq('id', currentHangoutId)
-            .single(); 
+            .single()
+            .then(({ data, error }) => {
+                if (error) {
+                    console.error('Failed to load title:', error);
+                    hangoutTitleDisplay.textContent = 'Error Loading Title';
+                } else if (data) {
+                    // Update Title
+                    hangoutTitleDisplay.textContent = data.hangout_name;
+                    
+                    // Update Links
+                    const scheduleLink = document.getElementById('schedule-link');
+                    const messageLink = document.getElementById('message-link');
+                    if (scheduleLink) scheduleLink.href = `schedule.html?id=${currentHangoutId}`;
+                    if (messageLink) messageLink.href = `chat.html?id=${currentHangoutId}`;
+                }
+            });
 
-        if (error) {
-            console.error('Error fetching hangout data:', error);
-            hangoutTitleDisplay.textContent = 'Error Loading Data';
-        } else if (data) {
-            // 3. Change the <h1> text to match the database
-            hangoutTitleDisplay.textContent = data.hangout_name;
-            
-            // 4. Inject the ID into the Schedule and Message buttons
-            // Now clicking schedule goes to "schedule.html?id=5"
-            document.getElementById('schedule-link').href = `schedule.html?id=${currentHangoutId}`;
-            document.getElementById('message-link').href = `chat.html?id=${currentHangoutId}`;
+        // 3. Setup the Leave/Delete Button Logic
+        if (leaveHangoutBtn) {
+            leaveHangoutBtn.addEventListener('click', async () => {
+                // Confirm with the user before deleting
+                const confirmDelete = confirm("Are you sure you want to leave? This will permanently delete the hangout.");
+                
+                if (confirmDelete) {
+                    leaveHangoutBtn.textContent = "Leaving...";
+                    leaveHangoutBtn.disabled = true;
+
+                    // Delete the specific row from Supabase
+                    const { error } = await supabase
+                        .from('hangouts')
+                        .delete()
+                        .eq('id', currentHangoutId);
+
+                    if (error) {
+                        console.error('Error deleting hangout:', error);
+                        alert("Could not remove hangout. Please try again.");
+                        leaveHangoutBtn.textContent = "Leave Hangout";
+                        leaveHangoutBtn.disabled = false;
+                    } else {
+                        // Success! Redirect to the homepage
+                        window.location.href = 'index.html';
+                    }
+                }
+            });
         }
     }
-    
-    // Execute the function
-    setupHangoutPage();
-}
 }

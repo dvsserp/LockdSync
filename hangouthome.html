@@ -15,7 +15,7 @@
             Back
         </a>
         
-        <!-- Title (Absolutely positioned to stay perfectly centered) -->
+        <!-- Hangout Title -->
         <h1 id="hangout-title" class="absolute left-0 right-0 text-center text-2xl font-bold text-black pointer-events-none">
             Loading...
         </h1>
@@ -24,16 +24,22 @@
     <!-- Main Content -->
     <main class="w-full max-w-md mx-auto px-6 pt-12 space-y-6 flex-1">
         
-        <!-- Schedule Button -->
         <a id="schedule-link" href="schedule.html" class="block w-full bg-[#2E2E2E] hover:bg-black transition text-white text-2xl font-medium py-8 rounded-xl text-center shadow-md">
             Schedule
         </a>
 
         <a id="message-link" href="chat.html" class="block w-full bg-[#2E2E2E] hover:bg-black transition text-white text-2xl font-medium py-8 rounded-xl text-center shadow-md">
             Message
-        </a>    
+        </a>
+
+        <!-- NEW: Leave Hangout Button -->
+        <button id="leave-hangout-btn" class="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition text-lg font-medium py-4 rounded-xl text-center mt-8">
+            Leave Hangout
+        </button>
         
     </main>
+
+    <!-- Supabase and App Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
 </body>
