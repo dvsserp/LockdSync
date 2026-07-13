@@ -268,7 +268,7 @@ if (activitiesContainer) {
     // Make sure the "Add activity" button carries the ID to the form page
     const addActivityBtn = document.getElementById('add-activity-btn');
     if (addActivityBtn) {
-        addActivityBtn.onclick = () => window.location.href = `createactivity.html?id=${hangoutId}`;
+        addActivityBtn.onclick = () => window.location.href = `createactivities.html?id=${hangoutId}`;
     }
 
     async function loadActivities() {
