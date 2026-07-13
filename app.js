@@ -12,7 +12,7 @@ async function loadHangouts() {
     // Fetch the hangouts from your table
     const { data: hangouts, error } = await supabase
         .from('hangouts')
-        .select('hangout_name, average_price, hangout_date');
+        .select('id, hangout_name, average_price, hangout_date');
 
     if (error) {
         console.error('Error fetching hangouts:', error);
