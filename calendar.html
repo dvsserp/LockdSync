@@ -14,7 +14,6 @@
                 font-family: 'Inter', sans-serif;
                 background-color: #f4f4f4;
             }
-            /* Clean appearance removal for custom styled select drops */
             .custom-select {
                 appearance: none;
                 -webkit-appearance: none;
@@ -33,7 +32,6 @@
                 <h1 class="text-[#a8a8a8] text-lg font-medium mb-4 px-6">
                     Calendar
                 </h1>
-
                 <div class="bg-white px-6 pt-2 pb-10">
                     <div class="border border-gray-200 rounded-[20px] p-5 mb-6">
                         <div
@@ -57,25 +55,18 @@
                                     ></path>
                                 </svg>
                             </button>
-
                             <div class="flex gap-2">
-                                <!-- Interactive dynamic selectors bounded to future timelines -->
                                 <select
                                     id="calendar-month"
                                     onchange="handleDropdownChange()"
                                     class="custom-select border border-gray-300 rounded-md pl-3 pr-7 py-1 text-[15px] text-gray-800 cursor-pointer bg-white hover:bg-gray-50 focus:outline-none"
-                                >
-                                    <!-- Populated programmatically -->
-                                </select>
+                                ></select>
                                 <select
                                     id="calendar-year"
                                     onchange="handleDropdownChange()"
                                     class="custom-select border border-gray-300 rounded-md pl-3 pr-7 py-1 text-[15px] text-gray-800 cursor-pointer bg-white hover:bg-gray-50 focus:outline-none"
-                                >
-                                    <!-- Populated programmatically -->
-                                </select>
+                                ></select>
                             </div>
-
                             <button
                                 onclick="navigateMonth(1)"
                                 class="text-gray-800 p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -95,7 +86,6 @@
                                 </svg>
                             </button>
                         </div>
-
                         <div
                             class="grid grid-cols-7 text-center text-[12px] text-gray-400 mb-4"
                         >
@@ -107,13 +97,11 @@
                             <div>Fr</div>
                             <div>Sa</div>
                         </div>
-
                         <div
                             id="calendar-grid"
                             class="grid grid-cols-7 text-center text-[15px] text-gray-700 gap-y-4 items-center"
                         ></div>
                     </div>
-
                     <div
                         id="day-details-container"
                         class="border border-gray-200 rounded-[20px] p-5 mb-6 bg-white hidden"
@@ -126,7 +114,6 @@
                         </h2>
                         <div id="day-activities-list" class="space-y-4"></div>
                     </div>
-
                     <div
                         class="border border-gray-100 rounded-[15px] p-4 bg-gray-50 mb-6"
                     >
@@ -172,7 +159,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="px-2 space-y-4">
                         <div class="flex items-center gap-4">
                             <div
@@ -201,7 +187,6 @@
                     </div>
                 </div>
             </div>
-
             <nav
                 class="border-t border-gray-200 bg-white shrink-0 sticky bottom-0 z-20 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.03)]"
             >
@@ -312,7 +297,6 @@
             </nav>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script>
             const AVAILABILITY_RULES = {
                 FREE: {
@@ -347,11 +331,11 @@
                 'Dec',
             ];
 
-            // Hard bounding rules (July 2026 anchors the bottom limit)
+            // Safety bounds rules (July 2026 anchor bottom limit)
             const START_YEAR = 2026;
             const START_MONTH = 6; // July (0-indexed)
+            const END_YEAR = START_YEAR + 10; // 2036
 
-            // Current visible engine view state variables
             let currentYear = 2026;
             let currentMonth = 6;
 
@@ -428,48 +412,44 @@
                 },
             ];
 
-            // Build out select nodes dynamically based on boundary timelines
             function initDropdowns() {
                 const yearSelect = document.getElementById('calendar-year');
                 yearSelect.innerHTML = '';
-                // Let options stretch out up to 10 years into the future
-                for (let y = START_YEAR; y <= START_YEAR + 10; y++) {
+                for (let y = START_YEAR; y <= END_YEAR; y++) {
                     const opt = document.createElement('option');
                     opt.value = y;
                     opt.innerText = y;
                     yearSelect.appendChild(opt);
                 }
                 yearSelect.value = currentYear;
-                updateMonthDropdown();
+                updateMonthDropdown(currentMonth);
             }
 
-            function updateMonthDropdown() {
+            function updateMonthDropdown(monthToSet) {
                 const monthSelect = document.getElementById('calendar-month');
-                const selectedYear = parseInt(
-                    document.getElementById('calendar-year').value,
-                );
-                const previousSelectedMonth =
-                    monthSelect.value !== ''
-                        ? parseInt(monthSelect.value)
-                        : currentMonth;
+                const yearSelect = document.getElementById('calendar-year');
+                const selectedYear = parseInt(yearSelect.value);
 
                 monthSelect.innerHTML = '';
 
-                // If anchored in 2026, restrict month arrays starting exclusively at July (6)
+                // Limit months based on boundary years
                 const startFrom = selectedYear === START_YEAR ? START_MONTH : 0;
+                const endAt = selectedYear === END_YEAR ? START_MONTH : 11;
 
-                for (let m = startFrom; m < 12; m++) {
+                for (let m = startFrom; m <= endAt; m++) {
                     const opt = document.createElement('option');
                     opt.value = m;
                     opt.innerText = MONTH_NAMES[m];
                     monthSelect.appendChild(opt);
                 }
 
-                // Keep selection consistent unless out-of-bounds due to limits
-                if (previousSelectedMonth >= startFrom) {
-                    monthSelect.value = previousSelectedMonth;
-                } else {
+                // Enforce safe boundaries on selection
+                if (monthToSet >= startFrom && monthToSet <= endAt) {
+                    monthSelect.value = monthToSet;
+                } else if (monthToSet < startFrom) {
                     monthSelect.value = startFrom;
+                } else {
+                    monthSelect.value = endAt;
                 }
 
                 currentYear = selectedYear;
@@ -477,7 +457,11 @@
             }
 
             function handleDropdownChange() {
-                updateMonthDropdown();
+                // Keep current month selection reference during select swap
+                const targetMonth =
+                    parseInt(document.getElementById('calendar-month').value) ||
+                    currentMonth;
+                updateMonthDropdown(targetMonth);
                 generateCalendarGrid();
                 document
                     .getElementById('day-details-container')
@@ -496,10 +480,17 @@
                     targetYear--;
                 }
 
-                // Prevent moving backwards past July 2026
+                // Safe proof: Prevent moving past lower bound (July 2026)
                 if (
                     targetYear < START_YEAR ||
                     (targetYear === START_YEAR && targetMonth < START_MONTH)
+                ) {
+                    return;
+                }
+                // Safe proof: Prevent moving past upper bound (July 2036)
+                if (
+                    targetYear > END_YEAR ||
+                    (targetYear === END_YEAR && targetMonth > START_MONTH)
                 ) {
                     return;
                 }
@@ -507,9 +498,9 @@
                 currentYear = targetYear;
                 currentMonth = targetMonth;
 
+                // Update DOM states seamlessly
                 document.getElementById('calendar-year').value = currentYear;
-                updateMonthDropdown();
-                document.getElementById('calendar-month').value = currentMonth;
+                updateMonthDropdown(currentMonth);
 
                 generateCalendarGrid();
                 document
@@ -521,7 +512,6 @@
                 const targetGrid = document.getElementById('calendar-grid');
                 targetGrid.innerHTML = '';
 
-                // Compute runtime day constraints dynamically using standard Date parameters
                 const firstDayIndex = new Date(
                     currentYear,
                     currentMonth,
@@ -533,14 +523,12 @@
                     0,
                 ).getDate();
 
-                // Render dynamic offsets
                 for (let i = 0; i < firstDayIndex; i++) {
                     const emptyCell = document.createElement('div');
                     emptyCell.className = 'h-10';
                     targetGrid.appendChild(emptyCell);
                 }
 
-                // Loop over total dynamic days calculated
                 for (let day = 1; day <= totalDaysInMonth; day++) {
                     const dayEvents = backendActivitiesDataset.filter(
                         (item) =>
@@ -567,19 +555,17 @@
                         } else if (combinedAverage >= 40) {
                             matchedRule = AVAILABILITY_RULES.FREE_NO_SHOW;
                         }
-
                         targetColorClass = `${matchedRule.colorClass} hover:opacity-90`;
 
-                        // Dynamic anchor conditional keeping special badge rule for index day 9
                         if (
                             day === 9 &&
                             currentMonth === 6 &&
                             currentYear === 2026
                         ) {
                             innerTemplateString = `
-                               <div class="bg-[#8b5a5a] text-white w-[34px] h-[34px] rounded-lg flex items-center justify-center mx-auto">
-                                   9
-                               </div>`;
+                        <div class="bg-[#8b5a5a] text-white w-[34px] h-[34px] rounded-lg flex items-center justify-center mx-auto">
+                            9
+                        </div>`;
                         }
                     }
 
@@ -588,14 +574,13 @@
                     anchorItem.setAttribute('onclick', `selectDay(${day})`);
                     anchorItem.className = `${targetColorClass} h-10 flex items-center justify-center transition-all cursor-pointer select-none rounded-[4px]`;
                     anchorItem.innerHTML = innerTemplateString;
-
                     targetGrid.appendChild(anchorItem);
                 }
 
-                // Balance layout trailing grids smoothly
                 const gridTotalCellsFilled = firstDayIndex + totalDaysInMonth;
                 const remainingTrailingPaddingSquares =
                     (7 - (gridTotalCellsFilled % 7)) % 7;
+
                 for (
                     let extra = 1;
                     extra <= remainingTrailingPaddingSquares;
@@ -638,22 +623,20 @@
                         defaultGrade: 'N/A',
                     };
                     const displayGrade = ev.grade || rule.defaultGrade;
-
                     const row = document.createElement('div');
                     row.className =
                         'flex items-center justify-between border-b border-gray-100 pb-3 last:border-0';
                     row.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-4 h-10 ${rule.colorClass} rounded-sm shrink-0"></div>
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">${ev.title}</div>
-                                <div class="text-xs text-gray-500">${ev.user}, ${ev.time}</div>
-                            </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-10 ${rule.colorClass} rounded-sm shrink-0"></div>
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">${ev.title}</div>
+                            <div class="text-xs text-gray-500">${ev.user}, ${ev.time}</div>
                         </div>
-                        <div class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-700">
-                            ⇧${displayGrade}
-                        </div>
-                    `;
+                    </div>
+                    <div class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-700">
+                        ⇧${displayGrade}
+                    </div>`;
                     list.appendChild(row);
                 });
             }
@@ -683,7 +666,6 @@
 
                 generateCalendarGrid();
                 selectDay(parseInt(dayInput));
-
                 document.getElementById('form-day').value = '';
                 document.getElementById('form-title').value = '';
             }
