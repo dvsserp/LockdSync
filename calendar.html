@@ -391,7 +391,9 @@
             let currentYear = 2026;
             let currentMonth = 6;
 
-            let backendActivitiesDataset = [
+            // --- LOCAL STORAGE BACKEND SETUP ---
+            // Base seed dataset to populate empty apps seamlessly
+            const defaultDataset = [
                 {
                     year: 2026,
                     month: 6,
@@ -464,7 +466,20 @@
                 },
             ];
 
-            // Populate the dynamic Time Dropdowns
+            // Read records from the local storage backend or fall back to defaults
+            let backendActivitiesDataset =
+                JSON.parse(localStorage.getItem('calendarActivities')) ||
+                defaultDataset;
+
+            // Sync helper to update our persistence database layer
+            function saveToBackendStore() {
+                localStorage.setItem(
+                    'calendarActivities',
+                    JSON.stringify(backendActivitiesDataset),
+                );
+            }
+            // ------------------------------------
+
             function populateTimeDropdowns() {
                 const hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
                 const minutes = ['00', '15', '30', '45'];
@@ -490,7 +505,6 @@
                 });
             }
 
-            // Convert drop-down outputs into absolute minutes from midnight
             function convertToAbsoluteMinutes(hr, min, ampm) {
                 let h = parseInt(hr);
                 let m = parseInt(min);
@@ -725,7 +739,6 @@
                     document.getElementById('form-status').value;
                 const titleInput = document.getElementById('form-title').value;
 
-                // Get values from new dropdown selections
                 const startH = document.getElementById('start-hour').value;
                 const startM = document.getElementById('start-min').value;
                 const startA = document.getElementById('start-ampm').value;
@@ -739,7 +752,6 @@
                     return;
                 }
 
-                // Enforce mandatory selection across all time dropdown components
                 if (!startH || !startM || !endH || !endM) {
                     alert(
                         'Please provide a complete selection for both Start Time and End Time.',
@@ -758,7 +770,6 @@
                     endA,
                 );
 
-                // Handle shifts crossing midnight boundary parameters smoothly
                 if (totalEndMinutes <= totalStartMinutes) {
                     totalEndMinutes += 24 * 60;
                 }
@@ -773,7 +784,6 @@
                     return;
                 }
 
-                // Create display string (e.g., "8:00 AM to 3:30 PM")
                 const formattedTimeStr = `${startH}:${startM} ${startA} to ${endH}:${endM} ${endA}`;
 
                 backendActivitiesDataset.push({
@@ -788,10 +798,12 @@
                         AVAILABILITY_RULES[statusInput]?.defaultGrade || 'A+',
                 });
 
+                // --- SYNC NEW ENTRY TO STORAGE BACKEND ---
+                saveToBackendStore();
+
                 generateCalendarGrid();
                 selectDay(parseInt(dayInput));
 
-                // Clear input forms back to default placeholder state
                 document.getElementById('form-day').value = '';
                 document.getElementById('form-title').value = '';
                 document.getElementById('start-hour').value = '';
