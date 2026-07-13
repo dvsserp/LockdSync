@@ -125,13 +125,26 @@
                     </div>
 
                     <div
+                        id="day-details-container"
+                        class="border border-gray-200 rounded-[20px] p-5 mb-6 bg-white hidden"
+                    >
+                        <h2
+                            id="selected-day-heading"
+                            class="text-gray-800 text-base font-semibold mb-4"
+                        >
+                            July 11th 2026 Schedule
+                        </h2>
+                        <div id="day-activities-list" class="space-y-4"></div>
+                    </div>
+
+                    <div
                         class="border border-gray-100 rounded-[15px] p-4 bg-gray-50 mb-6"
                     >
-                        <h3
+                        <h2
                             class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"
                         >
                             Quick Schedule Input
-                        </h3>
+                        </h2>
                         <div class="space-y-3">
                             <div class="grid grid-cols-2 gap-2">
                                 <input
@@ -330,17 +343,63 @@
                 },
             };
 
-            // 2. Local State Engine (Simulating DB returns before Supabase mapping)
+            // Step 2: Updated Dataset Schema with Times, Usernames, and Explicit Grades
             let backendActivitiesDataset = [
-                { day: 7, title: 'Doctor Appointment', type: 'NOT_AVAILABLE' },
-                { day: 8, title: 'School Bound Shift', type: 'NOT_AVAILABLE' },
-                { day: 9, title: 'Core Locked Shift', type: 'NOT_AVAILABLE' },
-                { day: 10, title: 'Clinical Blocks', type: 'NOT_AVAILABLE' },
-                { day: 11, title: 'Open Study Window', type: 'FREE' },
+                {
+                    day: 7,
+                    user: 'Jeffery',
+                    time: '8 AM to 3 PM',
+                    title: 'In School',
+                    type: 'NOT_AVAILABLE',
+                    grade: 'F',
+                },
+                {
+                    day: 8,
+                    user: 'Jeffery',
+                    time: '8 AM to 5 PM',
+                    title: 'School Bound Shift',
+                    type: 'NOT_AVAILABLE',
+                    grade: 'F',
+                },
+                {
+                    day: 9,
+                    user: 'Jeffery',
+                    time: '6 AM to 2 PM',
+                    title: 'Core Locked Shift',
+                    type: 'NOT_AVAILABLE',
+                    grade: 'F',
+                },
+                {
+                    day: 10,
+                    user: 'Jeffery',
+                    time: '9 AM to 4 PM',
+                    title: 'Clinical Blocks',
+                    type: 'NOT_AVAILABLE',
+                    grade: 'F',
+                },
                 {
                     day: 11,
+                    user: 'Jeffery',
+                    time: '8 AM to 3 PM',
+                    title: 'In School',
+                    type: 'NOT_AVAILABLE',
+                    grade: 'F',
+                },
+                {
+                    day: 11,
+                    user: 'Jeffery',
+                    time: '3 PM to 9 PM',
+                    title: 'Open Study Window',
+                    type: 'FREE',
+                    grade: 'A+',
+                },
+                {
+                    day: 11,
+                    user: 'Jeffery',
+                    time: '9 PM to 11 PM',
                     title: 'No Show Window Check',
                     type: 'FREE_NO_SHOW',
+                    grade: 'C-',
                 },
             ];
 
@@ -388,15 +447,19 @@
                         // Retain your custom highlight focus circle style for day 9
                         if (day === 9) {
                             innerTemplateString = `
-                                <div class="bg-[#8b5a5a] text-white w-[34px] h-[34px] rounded-lg flex items-center justify-center mx-auto">
-                                    9
-                                </div>`;
+                               <div class="bg-[#8b5a5a] text-white w-[34px] h-[34px] rounded-lg flex items-center justify-center mx-auto">
+                                   9
+                               </div>`;
                         }
                     }
 
                     // Render node out to string template link layout
                     const anchorItem = document.createElement('a');
-                    anchorItem.href = `Date_${day}.Jul.2026.html`;
+
+                    // Step 3: Changed Day Click Event Behavior (Enabling internal dynamic routing instead of file navigation)
+                    anchorItem.href = 'javascript:void(0);';
+                    anchorItem.setAttribute('onclick', `selectDay(${day})`);
+
                     anchorItem.className = `${targetColorClass} h-10 flex items-center justify-center transition-all cursor-pointer select-none rounded-[4px]`;
                     anchorItem.innerHTML = innerTemplateString;
 
@@ -413,7 +476,56 @@
                 }
             }
 
-            // 4. Input Controller action linking user form context to UI engine
+            // Step 4: Add Interactive View Function to Render Target Day Details
+            function selectDay(day) {
+                const container = document.getElementById(
+                    'day-details-container',
+                );
+                const heading = document.getElementById('selected-day-heading');
+                const list = document.getElementById('day-activities-list');
+
+                // Filter down matching items for clicked date row
+                const dayEvents = backendActivitiesDataset.filter(
+                    (item) => item.day === day,
+                );
+
+                heading.innerText = `July ${day}th, 2026 Schedule`;
+                list.innerHTML = '';
+                container.classList.remove('hidden');
+
+                if (dayEvents.length === 0) {
+                    list.innerHTML = `<p class="text-xs text-gray-400 italic">No scheduled activities logged for this day yet.</p>`;
+                    return;
+                }
+
+                // Loop and build out the timeline interface elements matching your specs
+                dayEvents.forEach((ev) => {
+                    const rule = AVAILABILITY_RULES[ev.type] || {
+                        colorClass: 'bg-gray-200',
+                        defaultGrade: 'N/A',
+                    };
+                    const displayGrade = ev.grade || rule.defaultGrade;
+
+                    const row = document.createElement('div');
+                    row.className =
+                        'flex items-center justify-between border-b border-gray-100 pb-3 last:border-0';
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-10 ${rule.colorClass} rounded-sm shrink-0"></div>
+                            <div>
+                                <div class="text-sm font-medium text-gray-900">${ev.title}</div>
+                                <div class="text-xs text-gray-500">${ev.user}, ${ev.time}</div>
+                            </div>
+                        </div>
+                        <div class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded text-gray-700">
+                            ⇧${displayGrade}
+                        </div>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+
+            // 5. Input Controller action linking user form context to UI engine
             function addUserEvent() {
                 const dayInput = document.getElementById('form-day').value;
                 const statusInput =
@@ -425,15 +537,22 @@
                     return;
                 }
 
-                // Append new localized structure to instance block variable array
+                // Step 5: Adjust Form Submissions to Support Usernames, Flexible Times, & Default Grades
                 backendActivitiesDataset.push({
                     day: parseInt(dayInput),
+                    user: 'Jeffery',
+                    time: 'Flexible Hours',
                     title: titleInput || 'Scheduled Activity Entry',
                     type: statusInput,
+                    grade:
+                        AVAILABILITY_RULES[statusInput]?.defaultGrade || 'A+',
                 });
 
                 // Re-trigger render processing pipeline to dynamically apply calculation engine changes
                 generateCalendarGrid();
+
+                // Keep view updated if user modifies currently selected frame
+                selectDay(parseInt(dayInput));
 
                 // Reset form fields
                 document.getElementById('form-day').value = '';
