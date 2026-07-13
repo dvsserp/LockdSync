@@ -9,10 +9,10 @@
     <body class="p-6 bg-gray-100 min-h-screen font-sans relative">
         <div class="flex justify-between items-center mb-6">
             <a
-                href="index.html"
+                href="calendar.html"
                 class="inline-block bg-[#2E2E2E] hover:bg-black transition text-white px-5 py-2 rounded-lg text-sm font-medium shadow-sm"
             >
-                Back
+                Back to Calendar
             </a>
             <button
                 onclick="toggleDevTools()"
@@ -44,7 +44,7 @@
             <div>
                 <label
                     class="block text-xs font-bold uppercase text-gray-500 mb-1"
-                    >Hangout Date</label
+                    >Hangout Date Text Banner</label
                 >
                 <input
                     type="text"
@@ -52,6 +52,44 @@
                     value="tomorrow"
                     class="w-full border border-gray-300 p-2 rounded-lg text-sm outline-none"
                 />
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label
+                        class="block text-[10px] font-bold uppercase text-gray-400 mb-1"
+                        >Target Day</label
+                    >
+                    <input
+                        type="number"
+                        id="dev-target-day"
+                        value="14"
+                        min="1"
+                        max="31"
+                        class="w-full border border-gray-300 p-1.5 rounded-lg text-xs outline-none"
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-bold uppercase text-gray-400 mb-1"
+                        >Target Month</label
+                    >
+                    <select
+                        id="dev-target-month"
+                        class="w-full border border-gray-300 p-1.5 rounded-lg text-xs outline-none bg-white"
+                    ></select>
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-bold uppercase text-gray-400 mb-1"
+                        >Target Year</label
+                    >
+                    <input
+                        type="number"
+                        id="dev-target-year"
+                        value="2026"
+                        class="w-full border border-gray-300 p-1.5 rounded-lg text-xs outline-none"
+                    />
+                </div>
             </div>
             <div>
                 <label
@@ -77,13 +115,48 @@
         <div id="notification-zone" class="max-w-3xl mx-auto mt-8"></div>
 
         <script>
-            // Toggle Panel Visibility
+            const MONTH_LABELS = [
+                'Jan',
+                'Feb',
+                'Mar',
+                'Apr',
+                'May',
+                'Jun',
+                'Jul',
+                'Aug',
+                'Sep',
+                'Oct',
+                'Nov',
+                'Dec',
+            ];
+
+            function initDevToolsDateDefaults() {
+                const now = new Date();
+                const monthSelect = document.getElementById('dev-target-month');
+
+                // Build options for all 12 months dynamically
+                monthSelect.innerHTML = '';
+                MONTH_LABELS.forEach((label, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = index;
+                    opt.innerText = label;
+                    if (index === now.getMonth()) {
+                        opt.selected = true;
+                    }
+                    monthSelect.appendChild(opt);
+                });
+
+                // Pre-populate input configurations with live system dates
+                document.getElementById('dev-target-day').value = now.getDate();
+                document.getElementById('dev-target-year').value =
+                    now.getFullYear();
+            }
+
             function toggleDevTools() {
                 const panel = document.getElementById('dev-tools-panel');
                 panel.classList.toggle('hidden');
             }
 
-            // Color Tier Matrix
             function getStreakTheme(streak) {
                 if (streak === 0)
                     return {
@@ -125,10 +198,9 @@
                     bg: '#9c27b0',
                     text: '#ffffff',
                     btnText: 'text-purple-900',
-                }; // 101 to infinite
+                };
             }
 
-            // Initialize state on render
             function loadNotificationCard() {
                 const container = document.getElementById('notification-zone');
                 const activeInvite = localStorage.getItem(
@@ -143,7 +215,6 @@
                     return;
                 }
 
-                // Look up what the current live chat streak value is right now
                 const currentGlobalStreak =
                     parseInt(localStorage.getItem('global_user_streak')) || 0;
                 const data = JSON.parse(activeInvite);
@@ -162,17 +233,15 @@
                             </button>
                             <button onclick="triggerLossStreak()" class="bg-white/95 hover:bg-white px-4 py-2 font-bold rounded-lg ${theme.btnText} transition shadow-sm flex items-center gap-1 text-base cursor-pointer">
                                 Loss Streak 
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                             </button>
                         </div>
 
                         <div class="flex items-center gap-3">
-                            <button onclick="dismissNotification()" class="px-5 py-2 font-bold rounded-lg hover:bg-white/20 transition cursor-pointer text-lg">
+                            <button onclick="acceptHangout()" class="px-5 py-2 font-bold bg-white/20 hover:bg-white/30 transition rounded-lg cursor-pointer text-lg">
                                 Accept
                             </button>
                             <button onclick="triggerAddStreak()" class="bg-white/95 hover:bg-white px-4 py-2 font-bold rounded-lg ${theme.btnText} transition shadow-sm flex items-center gap-1 text-base cursor-pointer">
                                 Add Streak
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
                             </button>
                         </div>
                     </div>
@@ -180,39 +249,106 @@
                 `;
             }
 
-            // Action Trigger logic
             function inviteUser() {
                 const name =
                     document.getElementById('dev-name').value.trim() || 'Bob';
-                const date =
+                const dateText =
                     document.getElementById('dev-date').value.trim() ||
                     'tomorrow';
-                const streak =
-                    parseInt(document.getElementById('dev-streak').value) || 0;
 
-                const inviteObject = { name, date, streak };
+                let targetDay = parseInt(
+                    document.getElementById('dev-target-day').value,
+                );
+                let targetMonth = parseInt(
+                    document.getElementById('dev-target-month').value,
+                );
+                let targetYear = parseInt(
+                    document.getElementById('dev-target-year').value,
+                );
+
+                // Handle string macro transformation dynamically relative to today's date
+                if (dateText.toLowerCase() === 'tomorrow') {
+                    const tomorrowsDate = new Date();
+                    tomorrowsDate.setDate(tomorrowsDate.getDate() + 1);
+
+                    // Only apply auto-override if form inputs haven't been manually adjusted away from current day presets
+                    const checkDay = new Date();
+                    if (targetDay === checkDay.getDate()) {
+                        targetDay = tomorrowsDate.getDate();
+                        targetMonth = tomorrowsDate.getMonth();
+                        targetYear = tomorrowsDate.getFullYear();
+                    }
+                }
+
+                const inviteObject = {
+                    name,
+                    date: dateText,
+                    hangoutDay: targetDay,
+                    hangoutMonth: targetMonth,
+                    hangoutYear: targetYear,
+                };
+
                 localStorage.setItem(
                     'active_hangout_invite',
                     JSON.stringify(inviteObject),
                 );
-
-                // FIXED: Removed the direct localStorage overwrite of 'global_user_streak' here
-                // so it respects whatever value is currently running inside chat.html instead!
-
                 loadNotificationCard();
             }
 
-            // Pulls active value and adds EXACTLY 1 point
+            function processCalendarInjection() {
+                const activeInvite = localStorage.getItem(
+                    'active_hangout_invite',
+                );
+                if (!activeInvite) return;
+                const data = JSON.parse(activeInvite);
+
+                const newEvent = {
+                    year: data.hangoutYear,
+                    month: data.hangoutMonth,
+                    day: data.hangoutDay,
+                    user: data.name,
+                    time: 'Confirmed Hangout Window',
+                    title: `✨ Special Hangout with ${data.name}`,
+                    type: 'HANGOUT',
+                    grade: 'VIP',
+                };
+
+                let currentDatabase =
+                    JSON.parse(localStorage.getItem('calendarActivities')) ||
+                    [];
+
+                // Clear any duplicate hangout tags for this day to prevent entry stacking
+                currentDatabase = currentDatabase.filter(
+                    (ev) =>
+                        !(
+                            ev.year === newEvent.year &&
+                            ev.month === newEvent.month &&
+                            ev.day === newEvent.day &&
+                            ev.type === 'HANGOUT'
+                        ),
+                );
+
+                currentDatabase.push(newEvent);
+                localStorage.setItem(
+                    'calendarActivities',
+                    JSON.stringify(currentDatabase),
+                );
+            }
+
+            function acceptHangout() {
+                processCalendarInjection();
+                dismissNotification();
+            }
+
             function triggerAddStreak() {
                 let currentStreak =
                     parseInt(localStorage.getItem('global_user_streak')) || 0;
                 currentStreak += 1;
-
                 localStorage.setItem('global_user_streak', currentStreak);
+                processCalendarInjection();
                 dismissNotification();
             }
 
-            // Instantly forces current value to 0
             function triggerLossStreak() {
                 localStorage.setItem('global_user_streak', 0);
                 dismissNotification();
@@ -223,8 +359,10 @@
                 loadNotificationCard();
             }
 
-            // Load content on page initialization
-            window.onload = loadNotificationCard;
+            window.onload = function () {
+                initDevToolsDateDefaults();
+                loadNotificationCard();
+            };
         </script>
     </body>
 </html>
