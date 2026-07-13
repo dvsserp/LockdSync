@@ -207,3 +207,117 @@ if (scheduleDateDisplay) {
             });
     }
 }
+
+// --- CREATE ACTIVITY LOGIC ---
+const createActivityForm = document.getElementById('create-activity-form');
+
+if (createActivityForm) {
+    // Ensure the back button remembers the hangout ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const hangoutId = urlParams.get('id');
+    document.getElementById('back-to-schedule-btn').href = `schedule.html?id=${hangoutId}`;
+
+    createActivityForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-activity-btn');
+        const errorText = document.getElementById('act-form-error');
+        
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+        errorText.classList.add('hidden');
+        
+        const actTime = document.getElementById('act-time').value;
+        const actName = document.getElementById('act-name').value;
+        const actPrice = document.getElementById('act-price').value;
+        const actLocation = document.getElementById('act-location').value;
+        
+        const { error } = await supabase
+            .from('activities')
+            .insert([
+                { 
+                    hangout_id: hangoutId,
+                    activity_time: actTime,
+                    activity_name: actName, 
+                    price: parseFloat(actPrice), 
+                    location: actLocation 
+                }
+            ]);
+            
+        if (error) {
+            console.error('Error adding activity:', error);
+            errorText.textContent = 'Failed to save activity.';
+            errorText.classList.remove('hidden');
+            submitBtn.textContent = 'Add to Schedule';
+            submitBtn.disabled = false;
+        } else {
+            // Success! Send back to schedule
+            window.location.href = `schedule.html?id=${hangoutId}`;
+        }
+    });
+}
+
+// --- UPDATE SCHEDULE LOGIC TO LOAD CARDS ---
+// We need to inject the fetch logic directly into the schedule.html code you already have.
+const activitiesContainer = document.getElementById('activities-container');
+
+if (activitiesContainer) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hangoutId = urlParams.get('id');
+
+    // Make sure the "Add activity" button carries the ID to the form page
+    const addActivityBtn = document.getElementById('add-activity-btn');
+    if (addActivityBtn) {
+        addActivityBtn.onclick = () => window.location.href = `createactivities.html?id=${hangoutId}`;
+    }
+
+    async function loadActivities() {
+        if (!hangoutId) return;
+
+        // Fetch activities matching the hangout ID, and order them by time ascending (earliest first)
+        const { data: activities, error } = await supabase
+            .from('activities')
+            .select('*')
+            .eq('hangout_id', hangoutId)
+            .order('activity_time', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching activities:', error);
+            return;
+        }
+
+        // Clear out the hardcoded sample cards
+        activitiesContainer.innerHTML = '';
+
+        if (activities.length === 0) {
+            activitiesContainer.innerHTML = '<p class="text-center text-gray-500 mt-10">No activities scheduled yet.</p>';
+            return;
+        }
+
+        // Generate a card for each activity
+        activities.forEach(act => {
+            // Format time from 14:30:00 to 2:30 pm
+            const [hours, minutes] = act.activity_time.split(':');
+            let h = parseInt(hours);
+            const ampm = h >= 12 ? 'pm' : 'am';
+            h = h % 12 || 12; // Convert 0 to 12
+            const displayTime = `${h}:${minutes} ${ampm}`;
+
+            const cardHTML = `
+            <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm mb-4">
+              <div class="flex justify-between items-center mb-6">
+                <span class="text-lg text-gray-900">${act.activity_name}</span>
+                <span class="text-lg text-gray-900">$${act.price}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-base text-gray-900">${displayTime}</span>
+                <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">${act.location}</span>
+              </div>
+            </div>
+            `;
+            activitiesContainer.insertAdjacentHTML('beforeend', cardHTML);
+        });
+    }
+
+    loadActivities();
+}
