@@ -4,8 +4,13 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Messaging Profile</title>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <style>
-            /* --- CREATIVE ENVIRONMENT & STRUCTURE --- */
+            :root {
+                --streak-color: #2196f3; /* Default Blue theme for 71-100 */
+            }
+
+            /* --- STRUCTURE & LAYOUT --- */
             body {
                 background-color: #f0f0f0;
                 font-family: Arial, sans-serif;
@@ -35,81 +40,173 @@
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
+                border: 4px solid var(--streak-color);
+                border-radius: 12px;
+                transition: border-color 0.3s ease;
             }
 
-            /* --- HEADER & GRAPHICS --- */
+            /* --- HEADER ACTIONS --- */
             .header {
                 padding: 30px 20px 10px;
                 position: relative;
                 z-index: 2;
             }
 
-            .back-btn {
+            .header-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .back-btn,
+            .control-btn {
+                position: relative;
+                z-index: 10;
                 background-color: #333;
                 color: white;
                 border: none;
-                padding: 8px 16px;
+                padding: 8px 14px;
                 border-radius: 8px;
                 font-size: 14px;
                 cursor: pointer;
-                margin-bottom: 20px;
+                text-decoration: none;
+            }
+
+            .back-btn:hover,
+            .control-btn:hover {
+                background-color: #111;
+            }
+
+            .hangout-name {
+                font-size: 18px;
+                font-weight: bold;
+                color: #111;
+                margin: 0;
+                text-align: center;
+                flex-grow: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                padding: 0 10px;
             }
 
             .header-text h2 {
                 margin: 0;
                 font-size: 22px;
-                font-weight: normal;
-                color: #111;
+                font-weight: bold;
+                color: var(--streak-color);
+                transition: color 0.3s ease;
             }
 
             .header-text h3 {
                 margin: 5px 0 0;
-                font-size: 22px;
+                font-size: 18px;
                 font-weight: normal;
-                color: #111;
+                color: #444;
             }
 
-            /* Overlapping Circles */
+            /* --- DYNAMIC STREAK FLAMES --- */
             .circles {
                 position: absolute;
                 top: -20px;
                 right: -20px;
-                z-index: -1;
+                z-index: 1;
+                pointer-events: none;
             }
+
             .circle {
                 border-radius: 50%;
                 position: absolute;
-            }
-            .circle-yellow {
-                width: 120px;
-                height: 120px;
-                background-color: #fce18d;
-                top: 30px;
-                right: 30px;
-            }
-            .circle-pink {
-                width: 100px;
-                height: 100px;
-                background-color: #ef9a9a;
-                top: 15px;
-                right: 25px;
-            }
-            .circle-blue {
-                width: 80px;
-                height: 80px;
-                background-color: #4285f4;
-                top: 0;
-                right: 15px;
+                background-color: var(--streak-color);
+                transition: background-color 0.3s ease;
+                pointer-events: none;
             }
 
-            /* --- CHAT MESSAGES --- */
+            .circle-1 {
+                width: 120px;
+                height: 120px;
+                top: 30px;
+                right: 30px;
+                opacity: 0.3;
+            }
+            .circle-2 {
+                width: 100px;
+                height: 100px;
+                top: 15px;
+                right: 25px;
+                opacity: 0.6;
+            }
+            .circle-3 {
+                width: 80px;
+                height: 80px;
+                top: 0;
+                right: 15px;
+                opacity: 1;
+            }
+
+            /* --- CONTROL MODAL OVERLAY --- */
+            .modal-overlay {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 100;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-content {
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                width: 80%;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            }
+
+            .modal-content h3 {
+                margin: 0 0 5px 0;
+                font-size: 18px;
+            }
+            .modal-content label {
+                font-size: 14px;
+                font-weight: 600;
+                color: #444;
+            }
+            .modal-content input {
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                font-size: 15px;
+                outline: none;
+            }
+
+            .modal-content button {
+                background: #111;
+                color: white;
+                padding: 12px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: bold;
+                margin-top: 8px;
+            }
+
+            /* --- CHAT TIMELINE --- */
             .chat-box {
                 flex: 1;
                 padding: 20px;
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
-                gap: 30px;
+                gap: 20px;
             }
 
             .message-wrapper {
@@ -118,64 +215,40 @@
                 max-width: 75%;
             }
 
-            .message-wrapper.left {
-                align-self: flex-start;
-                align-items: center;
-            }
-
             .message-wrapper.right {
                 align-self: flex-end;
-                align-items: center;
+                align-items: flex-end;
+            }
+
+            .message-wrapper.left {
+                align-self: flex-start;
+                align-items: flex-start;
             }
 
             .bubble {
-                padding: 15px 20px;
+                padding: 12px 18px;
                 border-radius: 20px;
-                font-size: 18px;
+                font-size: 16px;
                 line-height: 1.4;
                 position: relative;
                 color: #111;
             }
 
-            /* Tail shapes */
             .bubble::after {
                 content: '';
                 position: absolute;
-                bottom: -15px;
-                width: 40px;
-                height: 40px;
+                bottom: -10px;
+                width: 30px;
+                height: 30px;
                 border-radius: 50%;
                 z-index: -1;
-            }
-
-            .left .bubble::after {
-                left: 0;
             }
 
             .right .bubble::after {
                 right: 0;
             }
-
-            /* Colors based on sender */
-            .bg-green {
-                background-color: #b7d5a5;
-            }
-            .bg-green::after {
-                background-color: #b7d5a5;
-            }
-
-            .bg-orange {
-                background-color: #f4cd9a;
-            }
-            .bg-orange::after {
-                background-color: #f4cd9a;
-            }
-
-            .bg-grey {
-                background-color: #b3b3b3;
-            }
-            .bg-grey::after {
-                background-color: #b3b3b3;
+            .left .bubble::after {
+                left: 0;
             }
 
             .bg-blue {
@@ -185,63 +258,63 @@
                 background-color: #bce0fb;
             }
 
-            /* Subtext underneath bubbles */
             .subtext {
-                font-size: 12px;
-                margin-top: 15px;
-                color: #111;
-                text-align: center;
-                line-height: 1.2;
+                font-size: 11px;
+                margin-top: 6px;
+                color: #444;
+                white-space: pre-line;
+                line-height: 1.3;
+            }
+            .right .subtext {
+                text-align: right;
+            }
+            .left .subtext {
+                text-align: left;
             }
 
-            /* --- INPUT & FOOTER --- */
+            /* --- FOOTER UTILITIES --- */
             .footer {
-                padding: 15px 20px 5px;
+                padding: 15px 20px;
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
                 align-items: center;
-                margin-bottom: 75px; /* Ensures text area doesn't hit navigation menu */
+                background: transparent;
             }
 
             .input-field {
-                width: 80%;
-                padding: 10px;
+                width: 90%;
+                padding: 12px;
                 border-radius: 20px;
                 border: 1px solid #ccc;
                 font-size: 16px;
                 outline: none;
+                background: #fff;
             }
 
             .send-btn {
                 background-color: #bce0fb;
                 color: #111;
                 border: none;
-                padding: 12px 40px;
+                padding: 10px 40px;
                 border-radius: 30px;
-                font-size: 20px;
+                font-size: 18px;
                 cursor: pointer;
-                width: 200px;
+                width: 180px;
             }
 
             .send-btn:hover {
                 background-color: #a4d2f5;
             }
 
-            /* --- FIXED NAVIGATION BAR STYLES --- */
+            /* --- NAVIGATION MANIFEST --- */
             .bottom-nav {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
                 height: 70px;
                 background-color: #ffffff;
                 display: flex;
                 justify-content: space-around;
                 align-items: center;
                 border-top: 1px solid #e0e0e0;
-                z-index: 10;
-                padding-bottom: 5px;
             }
 
             .nav-item {
@@ -260,7 +333,6 @@
                 height: 26px;
                 fill: currentColor;
             }
-
             .nav-item.active {
                 color: #111111;
                 font-weight: bold;
@@ -269,17 +341,48 @@
     </head>
     <body>
         <div class="phone-container">
-            <div class="header">
-                <button class="back-btn">Back</button>
-                <div class="header-text">
-                    <h2>Your STREAK 100</h2>
-                    <h3>Title: Socializer</h3>
-                </div>
+            <div class="modal-overlay" id="control-modal">
+                <div class="modal-content">
+                    <h3>Admin Controls</h3>
+                    <label for="admin-streak-input">Streak Number:</label>
+                    <input
+                        type="number"
+                        id="admin-streak-input"
+                        value="100"
+                        min="0"
+                    />
 
+                    <label for="admin-title-input">Streak Title:</label>
+                    <input
+                        type="text"
+                        id="admin-title-input"
+                        value="Socializer"
+                    />
+
+                    <button onclick="saveControlSettings()">
+                        Save & Close
+                    </button>
+                </div>
+            </div>
+
+            <div class="header">
+                <div class="header-top">
+                    <a id="back-btn" href="index.html" class="back-btn">Back</a>
+                    <h1 class="hangout-name" id="display-hangout-name">
+                        Loading...
+                    </h1>
+                    <button class="control-btn" onclick="openControlMenu()">
+                        Control
+                    </button>
+                </div>
+                <div class="header-text">
+                    <h2 id="display-streak-num">Your STREAK 100</h2>
+                    <h3 id="display-streak-title">Title: Socializer</h3>
+                </div>
                 <div class="circles">
-                    <div class="circle circle-yellow"></div>
-                    <div class="circle circle-pink"></div>
-                    <div class="circle circle-blue"></div>
+                    <div class="circle circle-1"></div>
+                    <div class="circle circle-2"></div>
+                    <div class="circle circle-3"></div>
                 </div>
             </div>
 
@@ -296,7 +399,7 @@
             </div>
 
             <div class="bottom-nav">
-                <a href="index.html" class="nav-item active">
+                <a href="index.html" class="nav-item">
                     <svg viewBox="0 0 24 24" class="nav-icon">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                     </svg>
@@ -310,7 +413,7 @@
                     </svg>
                     <span>Activities</span>
                 </a>
-                <a href="profile.html" class="nav-item">
+                <a href="profile.html" class="nav-item active">
                     <svg viewBox="0 0 24 24" class="nav-icon">
                         <path
                             d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
@@ -338,46 +441,120 @@
         </div>
 
         <script>
-            /* --- JAVASCRIPT LOCALSTORAGE BACKEND --- */
+            /* --- 1. INITIALIZE SUPABASE INSTANCE --- */
+            const SUPABASE_URL = 'https://culmoystfpiyiudtfpzw.supabase.co';
+            const SUPABASE_ANON_KEY =
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1bG1veXN0ZnBpeWl1ZHRmcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDU2NzIsImV4cCI6MjA5OTI4MTY3Mn0.JedwAdBLb23BUc4Xecs_UXh01Jo6cxsaHw55PSQIe80';
 
-            const defaultMessages = [
-                {
-                    text: 'Hey OP and Jeffery want to handout?',
-                    streak: 'STREAK 1\nTitle: Newbie',
-                    align: 'left',
-                    colorClass: 'bg-green',
-                },
-                {
-                    text: 'OP, has accepted Hangout on July 11th, 2027',
-                    streak: 'STREAK 10\nTitle: Consist',
-                    align: 'right',
-                    colorClass: 'bg-orange',
-                },
-                {
-                    text: 'Jeffery has received the ultimate punishment—Public Shame: Loud Music On Train.',
-                    streak: 'STREAK 0\nTitle: Ghost',
-                    align: 'left',
-                    colorClass: 'bg-grey',
-                },
-            ];
+            // FIXED: Renamed local instance to 'supabaseClient' to prevent naming conflicts with global script object
+            const supabaseClient = supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_ANON_KEY,
+            );
+
+            /* --- 2. AUTOMATION ROUTING & LINK HANDLING --- */
+            const urlParams = new URLSearchParams(window.location.search);
+            const hangoutId = urlParams.get('id');
+
+            // Connect back button
+            const backBtn = document.getElementById('back-btn');
+            if (hangoutId) {
+                backBtn.href = `hangouthome.html?id=${hangoutId}`;
+            } else {
+                backBtn.href = 'index.html';
+            }
+
+            // Pull active hangout title from database table
+            async function fetchHangoutTitle() {
+                const titleElement = document.getElementById(
+                    'display-hangout-name',
+                );
+                if (!hangoutId) {
+                    titleElement.textContent = 'General Chat Room';
+                    return;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('hangouts')
+                    .select('hangout_name')
+                    .eq('id', hangoutId)
+                    .single();
+
+                if (error) {
+                    console.error('Error fetching hangout name:', error);
+                    titleElement.textContent = 'Chat Log';
+                } else if (data) {
+                    titleElement.textContent = data.hangout_name;
+                }
+            }
+
+            /* --- 3. RUNTIME STATE CONFIGURATION --- */
+            let currentStreak = 100;
+            let currentTitle = 'Socializer';
+
+            /* --- 4. COLOR SCALE MANAGEMENT LOGIC --- */
+            function getStreakColor(streak) {
+                if (streak === 0) return '#9e9e9e'; // Gray
+                if (streak >= 1 && streak <= 25) return '#4caf50'; // Green
+                if (streak >= 26 && streak <= 40) return '#ffeb3b'; // Yellow
+                if (streak >= 41 && streak <= 50) return '#ff9800'; // Orange
+                if (streak >= 51 && streak <= 70) return '#f44336'; // Red
+                if (streak >= 71 && streak <= 100) return '#2196f3'; // Blue
+                if (streak >= 101) return '#9c27b0'; // Purple
+                return '#9e9e9e';
+            }
+
+            function updateUIThemes() {
+                document.getElementById('display-streak-num').innerText =
+                    `Your STREAK ${currentStreak}`;
+                document.getElementById('display-streak-title').innerText =
+                    `Title: ${currentTitle}`;
+
+                const targetedHex = getStreakColor(currentStreak);
+                document.documentElement.style.setProperty(
+                    '--streak-color',
+                    targetedHex,
+                );
+            }
+
+            /* --- 5. CONTROL DRAWER MECHANICS --- */
+            const modal = document.getElementById('control-modal');
+
+            function openControlMenu() {
+                document.getElementById('admin-streak-input').value =
+                    currentStreak;
+                document.getElementById('admin-title-input').value =
+                    currentTitle;
+                modal.style.display = 'flex';
+            }
+
+            function saveControlSettings() {
+                currentStreak =
+                    parseInt(
+                        document.getElementById('admin-streak-input').value,
+                    ) || 0;
+                currentTitle =
+                    document.getElementById('admin-title-input').value ||
+                    'Unknown';
+
+                updateUIThemes();
+                modal.style.display = 'none';
+                renderMessages();
+            }
+
+            /* --- 6. STORAGE PERSISTENCE --- */
+            const storageKeyName = hangoutId
+                ? `chatMessages_${hangoutId}`
+                : 'chatMessages_standalone';
 
             function loadMessages() {
-                let savedData = localStorage.getItem('chatMessages');
-                if (savedData) {
-                    return JSON.parse(savedData);
-                } else {
-                    localStorage.setItem(
-                        'chatMessages',
-                        JSON.stringify(defaultMessages),
-                    );
-                    return defaultMessages;
-                }
+                let data = localStorage.getItem(storageKeyName);
+                return data ? JSON.parse(data) : [];
             }
 
             function renderMessages() {
                 const chatBox = document.getElementById('chat-box');
                 chatBox.innerHTML = '';
-
                 const messages = loadMessages();
 
                 messages.forEach((msg) => {
@@ -385,7 +562,7 @@
                     wrapper.className = `message-wrapper ${msg.align}`;
 
                     const bubble = document.createElement('div');
-                    bubble.className = `bubble ${msg.colorClass}`;
+                    bubble.className = `bubble bg-blue`;
                     bubble.textContent = msg.text;
 
                     const subtext = document.createElement('div');
@@ -396,26 +573,23 @@
                     wrapper.appendChild(subtext);
                     chatBox.appendChild(wrapper);
                 });
-
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
 
             function sendMessage() {
                 const inputField = document.getElementById('message-input');
                 const newText = inputField.value.trim();
-
                 if (newText === '') return;
 
                 const newMessage = {
                     text: newText,
-                    streak: 'STREAK 100\nTitle: Socializer',
+                    streak: `STREAK ${currentStreak}\nTitle: ${currentTitle}`,
                     align: 'right',
-                    colorClass: 'bg-blue',
                 };
 
                 const messages = loadMessages();
                 messages.push(newMessage);
-                localStorage.setItem('chatMessages', JSON.stringify(messages));
+                localStorage.setItem(storageKeyName, JSON.stringify(messages));
 
                 inputField.value = '';
                 renderMessages();
@@ -430,6 +604,9 @@
                     }
                 });
 
+            /* --- 7. INITIALIZATION SYSTEM --- */
+            fetchHangoutTitle();
+            updateUIThemes();
             renderMessages();
         </script>
     </body>
