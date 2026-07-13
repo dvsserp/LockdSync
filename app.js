@@ -24,7 +24,7 @@ async function loadHangouts() {
     hangouts.forEach(hangout => {
         // Create the card HTML, inserting the dynamic data
         const cardHTML = `
-        <a href="hangouthome.html" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white">
+        <a href="hangouthome.html?id=${hangout.id}" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white">
             <div class="flex justify-between items-start mb-6">
                 <h2 class="text-base font-semibold text-black">${hangout.hangout_name}</h2>
                 <span class="text-xs font-medium text-gray-500">$${hangout.average_price}</span>
@@ -101,4 +101,45 @@ if (createForm) {
             window.location.href = 'index.html';
         }
     });
+    // --- HANGOUT HOME PAGE LOGIC ---
+
+// Find the title element to confirm we are on the right page
+const hangoutTitleDisplay = document.getElementById('hangout-title');
+
+if (hangoutTitleDisplay) {
+    async function setupHangoutPage() {
+        // 1. Check the URL for the ID (e.g., hangouthome.html?id=5)
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentHangoutId = urlParams.get('id');
+
+        // If someone visits the page without clicking a card, stop them.
+        if (!currentHangoutId) {
+            hangoutTitleDisplay.textContent = 'Hangout Not Found';
+            return;
+        }
+
+        // 2. Fetch the hangout name from Supabase using that ID
+        const { data, error } = await supabase
+            .from('hangouts')
+            .select('hangout_name')
+            .eq('id', currentHangoutId)
+            .single(); 
+
+        if (error) {
+            console.error('Error fetching hangout data:', error);
+            hangoutTitleDisplay.textContent = 'Error Loading Data';
+        } else if (data) {
+            // 3. Change the <h1> text to match the database
+            hangoutTitleDisplay.textContent = data.hangout_name;
+            
+            // 4. Inject the ID into the Schedule and Message buttons
+            // Now clicking schedule goes to "schedule.html?id=5"
+            document.getElementById('schedule-link').href = `schedule.html?id=${currentHangoutId}`;
+            document.getElementById('message-link').href = `chat.html?id=${currentHangoutId}`;
+        }
+    }
+    
+    // Execute the function
+    setupHangoutPage();
+}
 }
