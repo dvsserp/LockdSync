@@ -9,6 +9,11 @@ var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 async function loadHangouts() {
     const container = document.getElementById('hangouts-container');
     
+    // THE FIX: If the container doesn't exist on this page, stop immediately!
+    if (!container) {
+        return; 
+    }
+    
     // Fetch the hangouts from your table
     const { data: hangouts, error } = await supabase
         .from('hangouts')
@@ -20,38 +25,29 @@ async function loadHangouts() {
         return;
     }
 
-    // 3. Generate HTML for each hangout and inject it into the container
+    // Generate HTML for each hangout and inject it into the container
     hangouts.forEach(hangout => {
-        // Create the card HTML, inserting the dynamic data
         const cardHTML = `
         <a href="hangouthome.html?id=${hangout.id}" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white">
             <div class="flex justify-between items-start mb-6">
                 <h2 class="text-base font-semibold text-black">${hangout.hangout_name}</h2>
                 <span class="text-xs font-medium text-gray-500">$${hangout.average_price}</span>
             </div>
-
+            
             <div class="flex justify-between items-center">
-                <!-- Overlapping Avatars matching Figma -->
                 <div class="flex -space-x-2">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="User">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=12" alt="User">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=13" alt="User">
-                    <div class="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[9px] font-medium text-gray-500">
-                        +1
-                    </div>
+                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="Avatar 1">
                 </div>
-                <!-- Date -->
                 <span class="text-[10px] font-medium text-gray-400">${hangout.hangout_date}</span>
             </div>
         </a>
         `;
         
-        // Add the new card to the container
         container.insertAdjacentHTML('beforeend', cardHTML);
     });
 }
 
-// 4. Run the function when the page loads
+// Run the function when the page loads
 loadHangouts();
 
 // --- CREATE HANGOUT LOGIC ---
