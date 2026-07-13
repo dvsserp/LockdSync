@@ -9,10 +9,15 @@ var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 async function loadHangouts() {
     const container = document.getElementById('hangouts-container');
     
+    // THE FIX: If the container doesn't exist on this page, stop immediately!
+    if (!container) {
+        return; 
+    }
+    
     // Fetch the hangouts from your table
     const { data: hangouts, error } = await supabase
         .from('hangouts')
-        .select('hangout_name, average_price, hangout_date');
+        .select('id, hangout_name, average_price, hangout_date');
 
     if (error) {
         console.error('Error fetching hangouts:', error);
@@ -20,38 +25,29 @@ async function loadHangouts() {
         return;
     }
 
-    // 3. Generate HTML for each hangout and inject it into the container
+    // Generate HTML for each hangout and inject it into the container
     hangouts.forEach(hangout => {
-        // Create the card HTML, inserting the dynamic data
         const cardHTML = `
-        <a href="hangouthome.html" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white">
+        <a href="hangouthome.html?id=${hangout.id}" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white">
             <div class="flex justify-between items-start mb-6">
                 <h2 class="text-base font-semibold text-black">${hangout.hangout_name}</h2>
                 <span class="text-xs font-medium text-gray-500">$${hangout.average_price}</span>
             </div>
-
+            
             <div class="flex justify-between items-center">
-                <!-- Overlapping Avatars matching Figma -->
                 <div class="flex -space-x-2">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="User">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=12" alt="User">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=13" alt="User">
-                    <div class="w-7 h-7 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-[9px] font-medium text-gray-500">
-                        +1
-                    </div>
+                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="Avatar 1">
                 </div>
-                <!-- Date -->
                 <span class="text-[10px] font-medium text-gray-400">${hangout.hangout_date}</span>
             </div>
         </a>
         `;
         
-        // Add the new card to the container
         container.insertAdjacentHTML('beforeend', cardHTML);
     });
 }
 
-// 4. Run the function when the page loads
+// Run the function when the page loads
 loadHangouts();
 
 // --- CREATE HANGOUT LOGIC ---
@@ -101,4 +97,72 @@ if (createForm) {
             window.location.href = 'index.html';
         }
     });
+} // <--- THIS BRACE MOVED HERE TO CLOSE THE FORM LOGIC!
+
+
+// --- HANGOUT HOME PAGE LOGIC ---
+const hangoutTitleDisplay = document.getElementById('hangout-title');
+const leaveHangoutBtn = document.getElementById('leave-hangout-btn');
+
+// Only run this if we are actually on the hangouthome.html page
+if (hangoutTitleDisplay) {
+    
+    // 1. Get ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentHangoutId = urlParams.get('id');
+
+    if (!currentHangoutId) {
+        hangoutTitleDisplay.textContent = 'Hangout Not Found';
+    } else {
+        // 2. Fetch the title safely
+        supabase
+            .from('hangouts')
+            .select('hangout_name')
+            .eq('id', currentHangoutId)
+            .single()
+            .then(({ data, error }) => {
+                if (error) {
+                    console.error('Failed to load title:', error);
+                    hangoutTitleDisplay.textContent = 'Error Loading Title';
+                } else if (data) {
+                    // Update Title
+                    hangoutTitleDisplay.textContent = data.hangout_name;
+                    
+                    // Update Links
+                    const scheduleLink = document.getElementById('schedule-link');
+                    const messageLink = document.getElementById('message-link');
+                    if (scheduleLink) scheduleLink.href = `schedule.html?id=${currentHangoutId}`;
+                    if (messageLink) messageLink.href = `chat.html?id=${currentHangoutId}`;
+                }
+            });
+
+        // 3. Setup the Leave/Delete Button Logic
+        if (leaveHangoutBtn) {
+            leaveHangoutBtn.addEventListener('click', async () => {
+                // Confirm with the user before deleting
+                const confirmDelete = confirm("Are you sure you want to leave? This will permanently delete the hangout.");
+                
+                if (confirmDelete) {
+                    leaveHangoutBtn.textContent = "Leaving...";
+                    leaveHangoutBtn.disabled = true;
+
+                    // Delete the specific row from Supabase
+                    const { error } = await supabase
+                        .from('hangouts')
+                        .delete()
+                        .eq('id', currentHangoutId);
+
+                    if (error) {
+                        console.error('Error deleting hangout:', error);
+                        alert("Could not remove hangout. Please try again.");
+                        leaveHangoutBtn.textContent = "Leave Hangout";
+                        leaveHangoutBtn.disabled = false;
+                    } else {
+                        // Success! Redirect to the homepage
+                        window.location.href = 'index.html';
+                    }
+                }
+            });
+        }
+    }
 }
