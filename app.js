@@ -166,3 +166,44 @@ if (hangoutTitleDisplay) {
         }
     }
 }
+
+// --- SCHEDULE PAGE LOGIC ---
+const scheduleDateDisplay = document.getElementById('schedule-date');
+
+// Only run if we are actually on the schedule.html page
+if (scheduleDateDisplay) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hangoutId = urlParams.get('id');
+
+    if (!hangoutId) {
+        scheduleDateDisplay.textContent = 'Date Not Found';
+    } else {
+        // 1. Ensure the Back button remembers which hangout we came from
+        const backBtn = document.getElementById('back-btn');
+        if (backBtn) {
+            backBtn.href = `hangouthome.html?id=${hangoutId}`;
+        }
+
+        // 2. Fetch the hangout date from Supabase
+        supabase
+            .from('hangouts')
+            .select('hangout_date')
+            .eq('id', hangoutId)
+            .single()
+            .then(({ data, error }) => {
+                if (error) {
+                    console.error('Failed to load date:', error);
+                    scheduleDateDisplay.textContent = 'Error';
+                } else if (data) {
+                    // 3. Format the date beautifully (e.g., "July 10")
+                    const rawDate = new Date(data.hangout_date);
+                    
+                    // We use timeZone: 'UTC' to prevent the browser from accidentally showing the day before
+                    const options = { month: 'long', day: 'numeric', timeZone: 'UTC' }; 
+                    const formattedDate = rawDate.toLocaleDateString('en-US', options);
+                    
+                    scheduleDateDisplay.textContent = formattedDate;
+                }
+            });
+    }
+}
