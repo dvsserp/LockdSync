@@ -1,10 +1,12 @@
 ### creating branches and moving between branches
-git branch {branchname} 
+
+git branch {branchname}
 git checkout {branchname}
 
 ### adding your changes and adding it to main
+
 git pull origin main
-git add . 
+git add .
 git commit -m ""
 git push
 git checkout main
@@ -15,7 +17,6 @@ git commit -m "merging"
 git push
 git checkout {branchname}
 git pull origin main
-
 
 testing AlvinBranch
 

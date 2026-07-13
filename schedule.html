@@ -1,72 +1,86 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Schedule</title>
-</head>
-<body class="bg-white font-sans text-gray-900">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <title>Schedule</title>
+    </head>
+    <body class="bg-white font-sans text-gray-900">
+        <!-- Main Full-Width Container -->
+        <div class="w-full min-h-screen flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-center relative px-4 py-6">
+                <!-- Added id="back-btn" so JS can dynamically attach the ID -->
+                <a
+                    id="back-btn"
+                    href="hangouthome.html"
+                    class="absolute left-4 bg-gray-800 text-gray-100 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition inline-block"
+                >
+                    Back
+                </a>
 
-  <!-- Main Full-Width Container -->
-  <div class="w-full min-h-screen flex flex-col">
-    
-    <!-- Header -->
-    <div class="flex items-center justify-center relative px-4 py-6">
-      <!-- Added id="back-btn" so JS can dynamically attach the ID -->
-      <a id="back-btn" href="hangouthome.html" class="absolute left-4 bg-gray-800 text-gray-100 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition inline-block">
-        Back
-      </a>
-      
-      <!-- Added id="schedule-date" -->
-      <h1 id="schedule-date" class="text-2xl font-bold text-black">Loading...</h1>
-    </div>
+                <!-- Added id="schedule-date" -->
+                <h1 id="schedule-date" class="text-2xl font-bold text-black">
+                    Loading...
+                </h1>
+            </div>
 
-    <!-- Black Divider -->
-    <hr class="border-t border-black mb-6">
+            <!-- Black Divider -->
+            <hr class="border-t border-black mb-6" />
 
-    <!-- Activity Cards Container -->
-    <!-- Added id="activities-container" so we can populate this dynamically later -->
-    <div id="activities-container" class="px-4 space-y-4 flex-grow">
-      
-      <!-- Card 1: Lunch -->
-      <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm">
-        <div class="flex justify-between items-center mb-6">
-          <span class="text-lg text-gray-900">Lunch</span>
-          <span class="text-lg text-gray-900">$5</span>
+            <!-- Activity Cards Container -->
+            <!-- Added id="activities-container" so we can populate this dynamically later -->
+            <div id="activities-container" class="px-4 space-y-4 flex-grow">
+                <!-- Card 1: Lunch -->
+                <div
+                    class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm"
+                >
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-lg text-gray-900">Lunch</span>
+                        <span class="text-lg text-gray-900">$5</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-base text-gray-900">12 pm</span>
+                        <span
+                            class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer"
+                            >McDonalds</span
+                        >
+                    </div>
+                </div>
+
+                <!-- Card 2: Ice Skating -->
+                <div
+                    class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm"
+                >
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-lg text-gray-900">Ice Skating</span>
+                        <span class="text-lg text-gray-900">$10</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-base text-gray-900">3 pm</span>
+                        <span
+                            class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer"
+                            >World Ice Arena</span
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Activity Button -->
+            <div class="pb-10 pt-6 flex justify-center">
+                <!-- Added an id to this button so we can link it later -->
+                <button
+                    id="add-activity-btn"
+                    class="bg-gray-800 text-gray-100 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition shadow-md"
+                >
+                    Add activity
+                </button>
+            </div>
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-base text-gray-900">12 pm</span>
-          <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">McDonalds</span>
-        </div>
-      </div>
 
-      <!-- Card 2: Ice Skating -->
-      <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm">
-        <div class="flex justify-between items-center mb-6">
-          <span class="text-lg text-gray-900">Ice Skating</span>
-          <span class="text-lg text-gray-900">$10</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-base text-gray-900">3 pm</span>
-          <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">World Ice Arena</span>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Add Activity Button -->
-    <div class="pb-10 pt-6 flex justify-center">
-      <!-- Added an id to this button so we can link it later -->
-      <button id="add-activity-btn" class="bg-gray-800 text-gray-100 px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-700 transition shadow-md">
-        Add activity
-    </button>
-    </div>
-
-  </div>
-  
-  <!-- Supabase and App Scripts MUST go here -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
-</body>
+        <!-- Supabase and App Scripts MUST go here -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="app.js"></script>
+    </body>
 </html>
