@@ -7,7 +7,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <style>
             :root {
-                --streak-color: #2196f3; /* Default Blue theme for 71-100 */
+                --streak-color: #9e9e9e; /* Default gray theme for 0 streak */
             }
 
             /* --- STRUCTURE & LAYOUT --- */
@@ -185,6 +185,7 @@
                 border-radius: 8px;
                 font-size: 15px;
                 outline: none;
+                width: calc(100% - 22px);
             }
 
             .modal-content button {
@@ -261,9 +262,11 @@
             .subtext {
                 font-size: 11px;
                 margin-top: 6px;
-                color: #444;
+                color: var(--streak-color);
+                font-weight: bold;
                 white-space: pre-line;
                 line-height: 1.3;
+                transition: color 0.3s ease;
             }
             .right .subtext {
                 text-align: right;
@@ -348,7 +351,7 @@
                     <input
                         type="number"
                         id="admin-streak-input"
-                        value="100"
+                        value="0"
                         min="0"
                     />
 
@@ -376,7 +379,7 @@
                     </button>
                 </div>
                 <div class="header-text">
-                    <h2 id="display-streak-num">Your STREAK 100</h2>
+                    <h2 id="display-streak-num">Your STREAK 0</h2>
                     <h3 id="display-streak-title">Title: Socializer</h3>
                 </div>
                 <div class="circles">
@@ -446,7 +449,6 @@
             const SUPABASE_ANON_KEY =
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1bG1veXN0ZnBpeWl1ZHRmcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDU2NzIsImV4cCI6MjA5OTI4MTY3Mn0.JedwAdBLb23BUc4Xecs_UXh01Jo6cxsaHw55PSQIe80';
 
-            // FIXED: Renamed local instance to 'supabaseClient' to prevent naming conflicts with global script object
             const supabaseClient = supabase.createClient(
                 SUPABASE_URL,
                 SUPABASE_ANON_KEY,
@@ -456,7 +458,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const hangoutId = urlParams.get('id');
 
-            // Connect back button
             const backBtn = document.getElementById('back-btn');
             if (hangoutId) {
                 backBtn.href = `hangouthome.html?id=${hangoutId}`;
@@ -464,7 +465,6 @@
                 backBtn.href = 'index.html';
             }
 
-            // Pull active hangout title from database table
             async function fetchHangoutTitle() {
                 const titleElement = document.getElementById(
                     'display-hangout-name',
@@ -488,13 +488,17 @@
                 }
             }
 
-            /* --- 3. RUNTIME STATE CONFIGURATION --- */
-            let currentStreak = 100;
-            let currentTitle = 'Socializer';
+            /* --- 3. RUNTIME GLOBAL STATE CONFIGURATION --- */
+            // Triple-checked: Explicitly checks for null to protect "0" from evaluating falsey
+            const storedStreak = localStorage.getItem('global_user_streak');
+            let currentStreak =
+                storedStreak !== null ? parseInt(storedStreak) : 0;
+            let currentTitle =
+                localStorage.getItem('global_user_title') || 'Socializer';
 
             /* --- 4. COLOR SCALE MANAGEMENT LOGIC --- */
             function getStreakColor(streak) {
-                if (streak === 0) return '#9e9e9e'; // Gray
+                if (streak === 0) return '#9e9e9e'; // Neutral Gray
                 if (streak >= 1 && streak <= 25) return '#4caf50'; // Green
                 if (streak >= 26 && streak <= 40) return '#ffeb3b'; // Yellow
                 if (streak >= 41 && streak <= 50) return '#ff9800'; // Orange
@@ -529,17 +533,22 @@
             }
 
             function saveControlSettings() {
-                currentStreak =
-                    parseInt(
-                        document.getElementById('admin-streak-input').value,
-                    ) || 0;
+                currentStreak = parseInt(
+                    document.getElementById('admin-streak-input').value,
+                );
+                if (isNaN(currentStreak) || currentStreak < 0)
+                    currentStreak = 0;
+
                 currentTitle =
                     document.getElementById('admin-title-input').value ||
                     'Unknown';
 
+                localStorage.setItem('global_user_streak', currentStreak);
+                localStorage.setItem('global_user_title', currentTitle);
+
                 updateUIThemes();
                 modal.style.display = 'none';
-                renderMessages();
+                renderMessages(); // Instantly synchronizes every historical message layout
             }
 
             /* --- 6. STORAGE PERSISTENCE --- */
@@ -567,7 +576,9 @@
 
                     const subtext = document.createElement('div');
                     subtext.className = 'subtext';
-                    subtext.innerText = msg.streak;
+
+                    // Connected: Dynamically updates to match current equalized global value
+                    subtext.innerText = `STREAK ${currentStreak}\nTitle: ${currentTitle}`;
 
                     wrapper.appendChild(bubble);
                     wrapper.appendChild(subtext);
@@ -583,7 +594,6 @@
 
                 const newMessage = {
                     text: newText,
-                    streak: `STREAK ${currentStreak}\nTitle: ${currentTitle}`,
                     align: 'right',
                 };
 
