@@ -1,12 +1,436 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Messaging Profile</title>
+        <style>
+            /* --- CREATIVE ENVIRONMENT & STRUCTURE --- */
+            body {
+                background-color: #f0f0f0;
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+            }
+
+            .phone-container {
+                width: 380px;
+                height: 800px;
+                background: linear-gradient(
+                    to right,
+                    #90cbf9 0%,
+                    #90cbf9 4%,
+                    #e8f4fd 10%,
+                    #ffffff 15%,
+                    #ffffff 85%,
+                    #e8f4fd 90%,
+                    #90cbf9 96%,
+                    #90cbf9 100%
+                );
+                position: relative;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* --- HEADER & GRAPHICS --- */
+            .header {
+                padding: 30px 20px 10px;
+                position: relative;
+                z-index: 2;
+            }
+
+            .back-btn {
+                background-color: #333;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                cursor: pointer;
+                margin-bottom: 20px;
+            }
+
+            .header-text h2 {
+                margin: 0;
+                font-size: 22px;
+                font-weight: normal;
+                color: #111;
+            }
+
+            .header-text h3 {
+                margin: 5px 0 0;
+                font-size: 22px;
+                font-weight: normal;
+                color: #111;
+            }
+
+            /* Overlapping Circles */
+            .circles {
+                position: absolute;
+                top: -20px;
+                right: -20px;
+                z-index: -1;
+            }
+            .circle {
+                border-radius: 50%;
+                position: absolute;
+            }
+            .circle-yellow {
+                width: 120px;
+                height: 120px;
+                background-color: #fce18d;
+                top: 30px;
+                right: 30px;
+            }
+            .circle-pink {
+                width: 100px;
+                height: 100px;
+                background-color: #ef9a9a;
+                top: 15px;
+                right: 25px;
+            }
+            .circle-blue {
+                width: 80px;
+                height: 80px;
+                background-color: #4285f4;
+                top: 0;
+                right: 15px;
+            }
+
+            /* --- CHAT MESSAGES --- */
+            .chat-box {
+                flex: 1;
+                padding: 20px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .message-wrapper {
+                display: flex;
+                flex-direction: column;
+                max-width: 75%;
+            }
+
+            .message-wrapper.left {
+                align-self: flex-start;
+                align-items: center;
+            }
+
+            .message-wrapper.right {
+                align-self: flex-end;
+                align-items: center;
+            }
+
+            .bubble {
+                padding: 15px 20px;
+                border-radius: 20px;
+                font-size: 18px;
+                line-height: 1.4;
+                position: relative;
+                color: #111;
+            }
+
+            /* Tail shapes */
+            .bubble::after {
+                content: '';
+                position: absolute;
+                bottom: -15px;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                z-index: -1;
+            }
+
+            .left .bubble::after {
+                left: 0;
+            }
+
+            .right .bubble::after {
+                right: 0;
+            }
+
+            /* Colors based on sender */
+            .bg-green {
+                background-color: #b7d5a5;
+            }
+            .bg-green::after {
+                background-color: #b7d5a5;
+            }
+
+            .bg-orange {
+                background-color: #f4cd9a;
+            }
+            .bg-orange::after {
+                background-color: #f4cd9a;
+            }
+
+            .bg-grey {
+                background-color: #b3b3b3;
+            }
+            .bg-grey::after {
+                background-color: #b3b3b3;
+            }
+
+            .bg-blue {
+                background-color: #bce0fb;
+            }
+            .bg-blue::after {
+                background-color: #bce0fb;
+            }
+
+            /* Subtext underneath bubbles */
+            .subtext {
+                font-size: 12px;
+                margin-top: 15px;
+                color: #111;
+                text-align: center;
+                line-height: 1.2;
+            }
+
+            /* --- INPUT & FOOTER --- */
+            .footer {
+                padding: 15px 20px 5px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+                margin-bottom: 75px; /* Ensures text area doesn't hit navigation menu */
+            }
+
+            .input-field {
+                width: 80%;
+                padding: 10px;
+                border-radius: 20px;
+                border: 1px solid #ccc;
+                font-size: 16px;
+                outline: none;
+            }
+
+            .send-btn {
+                background-color: #bce0fb;
+                color: #111;
+                border: none;
+                padding: 12px 40px;
+                border-radius: 30px;
+                font-size: 20px;
+                cursor: pointer;
+                width: 200px;
+            }
+
+            .send-btn:hover {
+                background-color: #a4d2f5;
+            }
+
+            /* --- FIXED NAVIGATION BAR STYLES --- */
+            .bottom-nav {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 70px;
+                background-color: #ffffff;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                border-top: 1px solid #e0e0e0;
+                z-index: 10;
+                padding-bottom: 5px;
+            }
+
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-decoration: none;
+                color: #8e8e93;
+                font-size: 12px;
+                gap: 4px;
+                width: 20%;
+            }
+
+            .nav-icon {
+                width: 26px;
+                height: 26px;
+                fill: currentColor;
+            }
+
+            .nav-item.active {
+                color: #111111;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="phone-container">
+            <div class="header">
+                <button class="back-btn">Back</button>
+                <div class="header-text">
+                    <h2>Your STREAK 100</h2>
+                    <h3>Title: Socializer</h3>
+                </div>
+
+                <div class="circles">
+                    <div class="circle circle-yellow"></div>
+                    <div class="circle circle-pink"></div>
+                    <div class="circle circle-blue"></div>
+                </div>
+            </div>
+
+            <div class="chat-box" id="chat-box"></div>
+
+            <div class="footer">
+                <input
+                    type="text"
+                    id="message-input"
+                    class="input-field"
+                    placeholder="Type a message..."
+                />
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+
+            <div class="bottom-nav">
+                <a href="index.html" class="nav-item active">
+                    <svg viewBox="0 0 24 24" class="nav-icon">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <a href="activities.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon">
+                        <path
+                            d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        />
+                    </svg>
+                    <span>Activities</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                        />
+                    </svg>
+                    <span>Profile</span>
+                </a>
+                <a href="calendar.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon">
+                        <path
+                            d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"
+                        />
+                    </svg>
+                    <span>Calendar</span>
+                </a>
+                <a href="settings.html" class="nav-item">
+                    <svg viewBox="0 0 24 24" class="nav-icon">
+                        <path
+                            d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"
+                        />
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
+
+        <script>
+            /* --- JAVASCRIPT LOCALSTORAGE BACKEND --- */
+
+            const defaultMessages = [
+                {
+                    text: 'Hey OP and Jeffery want to handout?',
+                    streak: 'STREAK 1\nTitle: Newbie',
+                    align: 'left',
+                    colorClass: 'bg-green',
+                },
+                {
+                    text: 'OP, has accepted Hangout on July 11th, 2027',
+                    streak: 'STREAK 10\nTitle: Consist',
+                    align: 'right',
+                    colorClass: 'bg-orange',
+                },
+                {
+                    text: 'Jeffery has received the ultimate punishment—Public Shame: Loud Music On Train.',
+                    streak: 'STREAK 0\nTitle: Ghost',
+                    align: 'left',
+                    colorClass: 'bg-grey',
+                },
+            ];
+
+            function loadMessages() {
+                let savedData = localStorage.getItem('chatMessages');
+                if (savedData) {
+                    return JSON.parse(savedData);
+                } else {
+                    localStorage.setItem(
+                        'chatMessages',
+                        JSON.stringify(defaultMessages),
+                    );
+                    return defaultMessages;
+                }
+            }
+
+            function renderMessages() {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = '';
+
+                const messages = loadMessages();
+
+                messages.forEach((msg) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = `message-wrapper ${msg.align}`;
+
+                    const bubble = document.createElement('div');
+                    bubble.className = `bubble ${msg.colorClass}`;
+                    bubble.textContent = msg.text;
+
+                    const subtext = document.createElement('div');
+                    subtext.className = 'subtext';
+                    subtext.innerText = msg.streak;
+
+                    wrapper.appendChild(bubble);
+                    wrapper.appendChild(subtext);
+                    chatBox.appendChild(wrapper);
+                });
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+
+            function sendMessage() {
+                const inputField = document.getElementById('message-input');
+                const newText = inputField.value.trim();
+
+                if (newText === '') return;
+
+                const newMessage = {
+                    text: newText,
+                    streak: 'STREAK 100\nTitle: Socializer',
+                    align: 'right',
+                    colorClass: 'bg-blue',
+                };
+
+                const messages = loadMessages();
+                messages.push(newMessage);
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+
+                inputField.value = '';
+                renderMessages();
+            }
+
+            document
+                .getElementById('message-input')
+                .addEventListener('keypress', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        sendMessage();
+                    }
+                });
+
+            renderMessages();
+        </script>
+    </body>
 </html>
