@@ -3,9 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Activities</title>
+    <!-- Lucide Icons for clean UI icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #fafafa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation Bar for Website layout */
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 70px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #222;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            color: #000;
+        }
+
+        .nav-item.active {
+            color: #000;
+            border-bottom: 2px solid #000;
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Main Content Container */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Search Bar Wrapper */
+        .search-container {
+            position: relative;
+            margin-bottom: 2.5rem;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.8rem 1.2rem;
+            padding-right: 2.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 50px;
+            outline: none;
+            background-color: #fff;
+            color: #333;
+            transition: border-color 0.2s;
+        }
+
+        .search-input::placeholder {
+            color: #aaa;
+        }
+
+        .search-input:focus {
+            border-color: #666;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #333;
+            pointer-events: none;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Activities Grid Stack */
+        .activities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Activity Card Structure matched to your mockup */
+        .activity-card {
+            background-color: #dadada; /* Gray fill matching image background */
+            border-radius: 4px;
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            row-gap: 3rem; /* Spacing between the top info and bottom info */
+            min-height: 140px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .activity-title {
+            grid-column: 1;
+            grid-row: 1;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #000;
+            align-self: start;
+        }
+
+        .activity-cost {
+            grid-column: 2;
+            grid-row: 1;
+            text-align: right;
+            font-size: 1rem;
+            color: #000;
+            align-self: start;
+        }
+
+        .activity-place {
+            grid-column: 2;
+            grid-row: 2;
+            text-align: right;
+            font-size: 1rem;
+            color: #000;
+            align-self: end;
+        }
+    </style>
 </head>
 <body>
-    
+
+    <!-- Desktop Navbar Menu Layout -->
+    <nav class="navbar">
+        <div class="logo">Dashboard</div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-item"><i data-lucide="home"></i>Home</a></li>
+            <li><a href="#" class="nav-item active"><i data-lucide="star"></i>Activities</a></li>
+            <li><a href="#" class="nav-item"><i data-lucide="user"></i>Profile</a></li>
+            <li><a href="#" class="nav-item"><i data-lucide="calendar"></i>Calendar</a></li>
+            <li><a href="#" class="nav-item"><i data-lucide="settings"></i>Settings</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Section Content -->
+    <main class="container">
+        
+        <!-- Search Input Field -->
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Value">
+            <i data-lucide="search" class="search-icon"></i>
+        </div>
+
+        <!-- Activities List Block -->
+        <div class="activities-list">
+            
+            <!-- Activity Item #1 -->
+            <div class="activity-card">
+                <div class="activity-title">Activity #1</div>
+                <div class="activity-cost">Cost:</div>
+                <div class="activity-place">Place:</div>
+            </div>
+
+            <!-- Activity Item #2 -->
+            <div class="activity-card">
+                <div class="activity-title">Activity #2</div>
+                <div class="activity-cost">Cost:</div>
+                <div class="activity-place">Place:</div>
+            </div>
+
+            <!-- Activity Item #3 -->
+            <div class="activity-card">
+                <div class="activity-title">Activity #3</div>
+                <div class="activity-cost">Cost:</div>
+                <div class="activity-place">Place:</div>
+            </div>
+
+            <!-- Activity Item #4 -->
+            <div class="activity-card">
+                <div class="activity-title">Activity #4</div>
+                <div class="activity-cost">Cost:</div>
+                <div class="activity-place">Place:</div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
