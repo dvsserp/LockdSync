@@ -161,131 +161,123 @@
             </p>
         </div>
 
-        <script>
-            // ---- Mock auth (UI only, stored in localStorage) ----
-            var isSignup = false;
-            var subtitle = document.getElementById('mode-subtitle');
-            var signupFields = document.getElementById('signup-fields');
-            var submitBtn = document.getElementById('submit-btn');
-            var toggleText = document.getElementById('toggle-text');
-            var toggleBtn = document.getElementById('toggle-btn');
-            var errorMsg = document.getElementById('error-msg');
-            var keyInput = document.getElementById('profile-key');
+       <!-- Add Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialize Supabase
+    const SUPABASE_URL = 'https://culmoystfpiyiudtfpzw.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // PASTE YOUR KEY HERE
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            function generateKey() {
-                var chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-                var out = '';
-                for (var i = 0; i < 8; i++) {
-                    out += chars.charAt(
-                        Math.floor(Math.random() * chars.length),
-                    );
-                }
-                return out.slice(0, 4) + '-' + out.slice(4);
+    var isSignup = false;
+    var subtitle = document.getElementById('mode-subtitle');
+    var signupFields = document.getElementById('signup-fields');
+    var submitBtn = document.getElementById('submit-btn');
+    var toggleText = document.getElementById('toggle-text');
+    var toggleBtn = document.getElementById('toggle-btn');
+    var errorMsg = document.getElementById('error-msg');
+    var keyInput = document.getElementById('profile-key');
+
+    // Automatically redirect if already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) window.location.href = 'index.html';
+    });
+
+    function generateKey() {
+        var chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        var out = '';
+        for (var i = 0; i < 8; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+        return out.slice(0, 4) + '-' + out.slice(4);
+    }
+
+    function showError(msg) {
+        errorMsg.textContent = msg;
+        errorMsg.classList.remove('hidden');
+    }
+
+    function setMode(signup) {
+        isSignup = signup;
+        errorMsg.classList.add('hidden');
+        if (signup) {
+            subtitle.textContent = 'Create your account to get started.';
+            signupFields.classList.remove('hidden');
+            submitBtn.textContent = 'Create Account';
+            toggleText.textContent = 'Already have an account?';
+            toggleBtn.textContent = 'Log in';
+            keyInput.value = generateKey();
+        } else {
+            subtitle.textContent = 'Welcome back — log in to sync up.';
+            signupFields.classList.add('hidden');
+            submitBtn.textContent = 'Log In';
+            toggleText.textContent = "Don't have an account?";
+            toggleBtn.textContent = 'Sign up';
+        }
+    }
+
+    toggleBtn.addEventListener('click', () => setMode(!isSignup));
+    document.getElementById('regen-key').addEventListener('click', () => keyInput.value = generateKey());
+
+    // Google Login (Optional: Requires extra setup in Supabase dashboard)
+    document.getElementById('google-btn').addEventListener('click', async () => {
+        await supabase.auth.signInWithOAuth({ provider: 'google' });
+    });
+
+    // Handle Login / Signup
+    submitBtn.addEventListener('click', async function () {
+        errorMsg.classList.add('hidden');
+        submitBtn.textContent = 'Please wait...';
+        submitBtn.disabled = true;
+
+        var email = document.getElementById('email').value.trim();
+        var password = document.getElementById('password').value.trim();
+
+        if (!email || !password) {
+            showError('Please enter your email and password.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = isSignup ? 'Create Account' : 'Log In';
+            return;
+        }
+
+        if (isSignup) {
+            var username = document.getElementById('username').value.trim();
+            if (!username) {
+                showError('Please create a username.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+                return;
             }
 
-            function showError(msg) {
-                errorMsg.textContent = msg;
-                errorMsg.classList.remove('hidden');
-            }
-
-            function clearError() {
-                errorMsg.classList.add('hidden');
-            }
-
-            function setMode(signup) {
-                isSignup = signup;
-                clearError();
-                if (signup) {
-                    subtitle.textContent =
-                        'Create your account to get started.';
-                    signupFields.classList.remove('hidden');
-                    submitBtn.textContent = 'Create Account';
-                    toggleText.textContent = 'Already have an account?';
-                    toggleBtn.textContent = 'Log in';
-                    keyInput.value = generateKey();
-                } else {
-                    subtitle.textContent = 'Welcome back — log in to sync up.';
-                    signupFields.classList.add('hidden');
-                    submitBtn.textContent = 'Log In';
-                    toggleText.textContent = "Don't have an account?";
-                    toggleBtn.textContent = 'Sign up';
-                }
-            }
-
-            toggleBtn.addEventListener('click', function () {
-                setMode(!isSignup);
+            // Real Supabase Signup
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: { data: { username: username, profile_key: keyInput.value } }
             });
 
-            document
-                .getElementById('regen-key')
-                .addEventListener('click', function () {
-                    keyInput.value = generateKey();
-                });
-
-            function saveSessionAndGo(user) {
-                localStorage.setItem('lockdsync_user', JSON.stringify(user));
+            if (error) {
+                showError(error.message);
+            } else {
                 window.location.href = 'index.html';
             }
-
-            document
-                .getElementById('google-btn')
-                .addEventListener('click', function () {
-                    // Mock Google login
-                    saveSessionAndGo({
-                        email: 'you@gmail.com',
-                        username: 'You',
-                        profileKey: generateKey(),
-                        provider: 'google',
-                    });
-                });
-
-            submitBtn.addEventListener('click', function () {
-                clearError();
-                var email = document.getElementById('email').value.trim();
-                var password = document.getElementById('password').value.trim();
-                if (!email || !password) {
-                    showError('Please enter your email and password.');
-                    return;
-                }
-                if (isSignup) {
-                    var username = document
-                        .getElementById('username')
-                        .value.trim();
-                    if (!username) {
-                        showError('Please create a username.');
-                        return;
-                    }
-                    saveSessionAndGo({
-                        email: email,
-                        username: username,
-                        profileKey: keyInput.value,
-                        provider: 'email',
-                    });
-                } else {
-                    // Mock login — reuse stored username if present, else derive from email
-                    var existing = null;
-                    try {
-                        existing = JSON.parse(
-                            localStorage.getItem('lockdsync_user'),
-                        );
-                    } catch (e) {}
-                    saveSessionAndGo({
-                        email: email,
-                        username:
-                            existing && existing.email === email
-                                ? existing.username
-                                : email.split('@')[0],
-                        profileKey:
-                            existing && existing.email === email
-                                ? existing.profileKey
-                                : generateKey(),
-                        provider: 'email',
-                    });
-                }
+        } else {
+            // Real Supabase Login
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
             });
 
-            // Init
-            setMode(false);
-        </script>
+            if (error) {
+                showError("Invalid email or password.");
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = isSignup ? 'Create Account' : 'Log In';
+    });
+
+    setMode(false);
+</script>
     </body>
 </html>
