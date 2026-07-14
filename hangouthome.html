@@ -1,46 +1,194 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Document</title>
-</head>
-<body class="bg-white min-h-screen flex flex-col">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <title>Hangout Hub</title>
+    </head>
+    <body class="bg-white min-h-screen flex flex-col">
+        <header
+            class="relative flex items-center justify-between px-4 md:px-8 py-4 border-b border-black pt-8"
+        >
+            <a
+                href="index.html"
+                class="bg-[#2E2E2E] hover:bg-black transition text-white px-5 py-2 rounded-lg text-sm font-medium z-10 shadow-sm"
+            >
+                Back
+            </a>
+            <h1
+                id="hangout-title"
+                class="absolute left-0 right-0 text-center text-2xl font-bold text-black pointer-events-none"
+            >
+                Loading...
+            </h1>
+            <div class="w-[72px]"></div>
+        </header>
 
-    <!-- Header -->
-    <header class="relative flex items-center px-4 md:px-8 py-4 border-b border-black pt-8">
-        <!-- Back Button -->
-        <a href="index.html" class="bg-[#2E2E2E] hover:bg-black transition text-white px-5 py-2 rounded-lg text-sm font-medium z-10 shadow-sm">
-            Back
-        </a>
-        
-        <!-- Hangout Title -->
-        <h1 id="hangout-title" class="absolute left-0 right-0 text-center text-2xl font-bold text-black pointer-events-none">
-            Loading...
-        </h1>
-    </header>
+        <main class="w-full max-w-md mx-auto px-6 pt-10 space-y-6 flex-1">
+            <div
+                class="bg-gray-50 border border-gray-200 rounded-2xl p-5 text-center"
+            >
+                <p
+                    class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1"
+                >
+                    Hangout Code
+                </p>
+                <div class="flex items-center justify-center gap-3">
+                    <span
+                        id="hangout-code"
+                        class="text-xl font-mono font-bold text-black tracking-widest bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200"
+                    >
+                        ------
+                    </span>
+                    <button
+                        id="copy-code-btn"
+                        onclick="copyHangoutCode()"
+                        class="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
+                        title="Copy code"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="1.5"
+                            stroke="currentColor"
+                            class="w-5 h-5"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                <p
+                    id="copy-toast"
+                    class="text-xs text-green-600 mt-2 font-medium opacity-0 transition-opacity duration-200"
+                >
+                    Code copied to clipboard!
+                </p>
+            </div>
 
-    <!-- Main Content -->
-    <main class="w-full max-w-md mx-auto px-6 pt-12 space-y-6 flex-1">
-        
-        <a id="schedule-link" href="schedule.html" class="block w-full bg-[#2E2E2E] hover:bg-black transition text-white text-2xl font-medium py-8 rounded-xl text-center shadow-md">
-            Schedule
-        </a>
+            <a
+                id="schedule-link"
+                href="schedule.html"
+                class="block w-full bg-[#2E2E2E] hover:bg-black transition text-white text-2xl font-medium py-8 rounded-xl text-center shadow-md"
+            >
+                Schedule
+            </a>
+            <a
+                id="message-link"
+                href="chat.html"
+                class="block w-full bg-[#2E2E2E] hover:bg-black transition text-white text-2xl font-medium py-8 rounded-xl text-center shadow-md"
+            >
+                Message
+            </a>
+            <button
+                id="leave-hangout-btn"
+                class="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition text-lg font-medium py-4 rounded-xl text-center mt-8"
+            >
+                Leave Hangout
+            </button>
+        </main>
 
-        <a id="message-link" href="chat.html" class="block w-full bg-[#2E2E2E] hover:bg-black transition text-white text-2xl font-medium py-8 rounded-xl text-center shadow-md">
-            Message
-        </a>
+        <script>
+            // Helper to generate a unique random code string
+            function createRandomCodeString() {
+                const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+                let part1 = '';
+                let part2 = '';
+                for (let i = 0; i < 3; i++) {
+                    part1 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
+                    part2 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
+                }
+                return `${part1}-${part2}`;
+            }
 
-        <!-- NEW: Leave Hangout Button -->
-        <button id="leave-hangout-btn" class="w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition text-lg font-medium py-4 rounded-xl text-center mt-8">
-            Leave Hangout
-        </button>
-        
-    </main>
+            // Function to retrieve the unique hangout code stored for this specific hangout
+            function initHangoutCode() {
+                // 1. Prioritize finding a distinct ID or dynamic Name
+                const currentHangoutId =
+                    localStorage.getItem('current_hangout_id');
+                let currentHangoutName = localStorage.getItem(
+                    'current_hangout_name',
+                );
 
-    <!-- Supabase and App Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js"></script>
-</body>
+                // Grab title element text dynamically if localStorage variable is missing
+                const titleEl = document.getElementById('hangout-title');
+                if (
+                    !currentHangoutName &&
+                    titleEl &&
+                    titleEl.innerText !== 'Loading...'
+                ) {
+                    currentHangoutName = titleEl.innerText.trim();
+                }
+
+                // Determine a strict unique identifier.
+                // If it's still missing, we format a temporary random key so groups don't cross-contaminate codes!
+                let uniqueKeyIdentifier =
+                    currentHangoutId || currentHangoutName;
+                if (
+                    !uniqueKeyIdentifier ||
+                    uniqueKeyIdentifier === 'Loading...' ||
+                    uniqueKeyIdentifier === 'Our Hangout'
+                ) {
+                    uniqueKeyIdentifier =
+                        'temp_group_' +
+                        Math.random().toString(36).substring(2, 9);
+                }
+
+                // Create a unique key name safely cleaned of whitespace
+                const key = `hangout_code_${uniqueKeyIdentifier.toLowerCase().replace(/\s+/g, '_')}`;
+
+                // 2. Lookup storage for this distinct group key
+                let hangoutCode = localStorage.getItem(key);
+
+                // 3. Generate a brand new code ONLY if this specific key has never been set
+                if (!hangoutCode || hangoutCode === '------') {
+                    hangoutCode = createRandomCodeString();
+                    localStorage.setItem(key, hangoutCode);
+                }
+
+                // 4. Update the DOM
+                document.getElementById('hangout-code').innerText = hangoutCode;
+            }
+
+            // Function to copy hangout code
+            function copyHangoutCode() {
+                const codeText =
+                    document.getElementById('hangout-code').innerText;
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const toast = document.getElementById('copy-toast');
+                    toast.classList.remove('opacity-0');
+                    setTimeout(() => {
+                        toast.classList.add('opacity-0');
+                    }, 2000);
+                });
+            }
+
+            // Run code setup on load
+            window.addEventListener('DOMContentLoaded', () => {
+                const currentTitle = document.getElementById('hangout-title');
+                const savedName = localStorage.getItem('current_hangout_name');
+
+                // Load the distinct name cleanly before setting the code
+                if (savedName) {
+                    currentTitle.innerText = savedName;
+                } else if (currentTitle.innerText === 'Loading...') {
+                    currentTitle.innerText = 'Our Hangout';
+                }
+
+                // Run the code generator linked strictly to this dynamic name
+                initHangoutCode();
+            });
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="app.js"></script>
+    </body>
 </html>
