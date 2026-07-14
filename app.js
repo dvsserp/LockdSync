@@ -337,3 +337,11 @@ if (activitiesContainer) {
 
     loadActivities();
 }
+
+// --- GLOBAL AUTHENTICATION CHECK ---
+supabase.auth.getSession().then(({ data: { session } }) => {
+    // Redirect to login if no session AND they aren't on the login OR landing page
+    if (!session && !window.location.pathname.includes('login.html') && !window.location.pathname.includes('landingpage.html')) {
+        window.location.href = 'login.html';
+    }
+});
