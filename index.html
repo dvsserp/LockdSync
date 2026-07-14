@@ -9,28 +9,40 @@
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
             rel="stylesheet"
         />
+        <link rel="stylesheet" href="style.css" />
         <style>
             body {
                 font-family: 'Inter', sans-serif;
             }
         </style>
-    </head>
+        <script>
+            // Authentication Check: Redirect to login if user object doesn't exist
+            document.addEventListener('DOMContentLoaded', function () {
+                const user = localStorage.getItem('lockdsync_user');
+                if (!user) {
+                    window.location.href = 'login.html';
+                }
+            });
 
-    <body
-        class="bg-[#fafafa] h-screen flex flex-col overflow-hidden text-gray-900 antialiased w-full"
-    >
-        <!-- Top Header (Full Width, Perfectly Centered Title) -->
+            // Prompt logic for joining via code
+            function promptJoinCode() {
+                const code = prompt('Enter the Hangout Code:');
+                if (code) {
+                    alert(
+                        'Joining hangout with code: ' +
+                            code +
+                            '\n(Backend logic goes here!)',
+                    );
+                }
+            }
+        </script>
+    </head>
+    <body class="bg-white h-screen flex flex-col overflow-hidden text-gray-900">
         <header
             class="relative w-full flex justify-end items-center px-6 py-5 border-b border-gray-300 bg-white shrink-0 z-20"
         >
-            <!-- Title absolute centered to ignore the bell icon's width -->
-            <h1
-                class="absolute left-0 right-0 text-center text-lg font-semibold text-black pointer-events-none"
-            >
-                Home
-            </h1>
-
-            <!-- Notification Bell -->
+            <div class="w-6"></div>
+            <h1 class="text-lg font-semibold text-black">Home</h1>
             <a
                 href="notification.html"
                 class="text-black hover:text-gray-600 transition z-10 relative pointer-events-auto"
@@ -52,22 +64,74 @@
             </a>
         </header>
 
-        <!-- Main Content: Scrollable Area (Centered on Desktop) -->
         <main
             id="hangouts-container"
-            class="flex-1 w-full max-w-[900px] mx-auto px-6 py-8 space-y-4 overflow-y-auto relative pb-32"
+            class="flex-1 px-5 py-6 overflow-y-auto relative flex flex-col"
         >
-            <!-- JavaScript will inject cards here -->
+            <div
+                id="empty-state"
+                class="flex-1 flex flex-col items-center justify-center text-center px-4"
+            >
+                <div
+                    class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-100"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-8 h-8 text-gray-400"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                        />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+                        />
+                    </svg>
+                </div>
+                <h2 class="text-lg font-medium text-black mb-1">
+                    No hangouts yet
+                </h2>
+                <p class="text-sm text-gray-500">
+                    Create a new hangout or join an existing one using a code to
+                    get started.
+                </p>
+            </div>
         </main>
 
-        <!-- Floating Action Button (Plus Sign) -->
-        <!-- Fixed to the viewport so it hovers above the centered content -->
         <div
-            class="fixed bottom-[5.5rem] left-0 w-full flex justify-center pointer-events-none z-40"
+            class="absolute bottom-20 left-0 right-0 flex justify-center gap-3 pointer-events-none z-10 px-6"
         >
+            <button
+                onclick="promptJoinCode()"
+                class="h-12 px-5 bg-white border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-black hover:border-black transition shadow-sm pointer-events-auto text-sm font-medium"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="w-5 h-5 mr-2"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z"
+                    />
+                </svg>
+                Join Code
+            </button>
+
             <a
                 href="createhangout.html"
-                class="w-[3.25rem] h-[3.25rem] bg-white border-[1.5px] border-black rounded-full flex items-center justify-center text-black hover:bg-gray-100 transition-colors shadow-md pointer-events-auto"
+                class="w-12 h-12 bg-white border border-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-black hover:border-black transition shadow-sm pointer-events-auto shrink-0"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -86,10 +150,7 @@
             </a>
         </div>
 
-        <!-- Bottom Navigation bar (Full Width Background, Centered Icons) -->
-        <nav
-            class="fixed bottom-0 left-0 w-full border-t border-gray-200 bg-white z-50 pb-safe flex justify-center"
-        >
+        <nav class="border-t border-gray-200 bg-white shrink-0 z-20 pb-safe">
             <ul
                 class="w-full max-w-md flex items-center justify-between px-6 py-3"
             >
@@ -211,7 +272,6 @@
             </ul>
         </nav>
 
-        <!-- Supabase and App Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="app.js"></script>
     </body>

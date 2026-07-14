@@ -18,11 +18,9 @@
     <body
         class="bg-gray-50 h-screen flex flex-col overflow-hidden text-gray-900"
     >
-        <!-- Top Header -->
         <header
             class="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white shrink-0"
         >
-            <!-- Back Button -->
             <a
                 href="index.html"
                 class="text-gray-600 hover:text-black transition flex items-center"
@@ -42,17 +40,12 @@
                     />
                 </svg>
             </a>
-
             <h1 class="text-lg font-semibold text-black">New Hangout</h1>
-
-            <!-- Invisible spacer to center the title perfectly -->
             <div class="w-6"></div>
         </header>
 
-        <!-- Main Content: Form -->
         <main class="flex-1 px-5 py-8 overflow-y-auto bg-white">
             <form id="create-hangout-form" class="space-y-6">
-                <!-- Hangout Name Input -->
                 <div>
                     <label
                         for="hangout-name"
@@ -67,8 +60,6 @@
                         placeholder="e.g. Dinner & Movie"
                     />
                 </div>
-
-                <!-- Average Price Input -->
                 <div>
                     <label
                         for="hangout-price"
@@ -84,8 +75,6 @@
                         placeholder="0.00"
                     />
                 </div>
-
-                <!-- Date Input -->
                 <div>
                     <label
                         for="hangout-date"
@@ -99,8 +88,6 @@
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                     />
                 </div>
-
-                <!-- Submit Button -->
                 <button
                     type="submit"
                     id="submit-btn"
@@ -108,8 +95,6 @@
                 >
                     Create Hangout
                 </button>
-
-                <!-- Hidden Error Message -->
                 <p
                     id="form-error"
                     class="text-red-500 text-sm text-center hidden mt-2"
@@ -117,7 +102,37 @@
             </form>
         </main>
 
-        <!-- Supabase and App Scripts -->
+        <script>
+            // Generator function for a completely unique Hangout Code (Format: XXX-XXX)
+            function generateUniqueCode() {
+                const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // Clean set (no ambiguous O, I, 1, 0)
+                let part1 = '';
+                let part2 = '';
+                for (let i = 0; i < 3; i++) {
+                    part1 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
+                    part2 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
+                }
+                return `${part1}-${part2}`;
+            }
+
+            document
+                .getElementById('create-hangout-form')
+                .addEventListener('submit', function (e) {
+                    // Create a unique code upon creation form submission
+                    const uniqueCode = generateUniqueCode();
+
+                    // Save code dynamically so app.js can intercept it when creating the record in Supabase / Local storage
+                    localStorage.setItem('pending_hangout_code', uniqueCode);
+                    console.log(
+                        'Generated unique code for new hangout: ',
+                        uniqueCode,
+                    );
+                });
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="app.js"></script>
     </body>
