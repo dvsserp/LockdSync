@@ -12,14 +12,6 @@
         }
     </style>
     <script>
-        // Authentication Check: Redirect to login if user object doesn't exist
-        document.addEventListener('DOMContentLoaded', function () {
-            const user = localStorage.getItem('lockdsync_user');
-            if (!user) {
-                window.location.href = 'login.html';
-            }
-        });
-
         // Prompt logic for joining via code
         function promptJoinCode() {
             const code = prompt('Enter the Hangout Code:');
