@@ -81,15 +81,13 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Link app.js to use its existing Supabase setup -->
+    <script src="app.js"></script>
+    
     <script>
-        // 1. Initialize Supabase
-        const SUPABASE_URL = 'https://culmoystfpiyiudtfpzw.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1bG1veXN0ZnBpeWl1ZHRmcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDU2NzIsImV4cCI6MjA5OTI4MTY3Mn0.JedwAdBLb23BUc4Xecs_UXh01Jo6cxsaHw55PSQIe80';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         let isSignup = false;
 
-        // 2. Elements Setup
+        // 1. Elements Setup
         const tabLogin = document.getElementById('tab-login');
         const tabSignup = document.getElementById('tab-signup');
         const submitBtn = document.getElementById('submit-btn');
@@ -100,7 +98,7 @@
         const regenKeyBtn = document.getElementById('regen-key');
         const profileKeyInput = document.getElementById('profile-key');
 
-        // 3. UI Helper Functions
+        // 2. UI Helper Functions
         function showError(message) {
             errorMsg.textContent = message;
             errorContainer.classList.remove('hidden');
@@ -146,14 +144,14 @@
             }
         }
 
-        // 4. Attach Event Listeners
+        // 3. Attach Event Listeners
         tabLogin.addEventListener('click', () => setMode('login'));
         tabSignup.addEventListener('click', () => setMode('signup'));
         regenKeyBtn.addEventListener('click', generateProfileKey);
 
-        // 5. Form Submission Logic
+        // 4. Form Submission Logic
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevents page reload
+            e.preventDefault();
             hideError();
             
             submitBtn.disabled = true;
@@ -170,7 +168,7 @@
                         .from('users')
                         .select('username')
                         .eq('username', rawUsername)
-                        .maybeSingle(); // Safe check that won't throw a harsh error if empty
+                        .maybeSingle(); 
                     
                     if (existingUser) {
                         showError("That username is already taken!");
@@ -186,7 +184,7 @@
                         } else {
                             localStorage.setItem('lockdsync_user', JSON.stringify({ username: rawUsername, profile_key: profileKey }));
                             window.location.href = 'index.html';
-                            return; // Stop execution here so we don't reset the button
+                            return; 
                         }
                     }
                 } else {
@@ -203,7 +201,7 @@
                     } else {
                         localStorage.setItem('lockdsync_user', JSON.stringify({ username: user.username, profile_key: user.profile_key }));
                         window.location.href = 'index.html';
-                        return; // Stop execution here
+                        return; 
                     }
                 }
             } catch (err) {
@@ -211,7 +209,6 @@
                 showError("A connection error occurred. Please try again.");
             }
             
-            // Reset button if there was an error
             submitBtn.disabled = false;
             submitBtn.textContent = isSignup ? 'Create Profile' : 'Log In';
         });
