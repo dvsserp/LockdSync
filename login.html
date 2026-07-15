@@ -1,220 +1,320 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>LockdSync — Log In</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
-</head>
-<body class="bg-[#fafafa] min-h-screen flex flex-col justify-center items-center px-4 text-gray-900 antialiased">
-    
-    <div class="w-full max-w-md">
-        <!-- Back Button -->
-        <a href="landingpage.html" class="inline-flex items-center text-sm font-medium text-gray-400 hover:text-black transition mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 mr-1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-            </svg>
-            Back to Waitlist
-        </a>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <title>LockdSync — Log In</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-[#fafafa] min-h-screen flex flex-col justify-center items-center px-4 text-gray-900 antialiased"
+    >
+        <div class="w-full max-w-md">
+            <!-- Back Button -->
+            <a
+                href="landingpage.html"
+                class="inline-flex items-center text-sm font-medium text-gray-400 hover:text-black transition mb-6"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2.5"
+                    stroke="currentColor"
+                    class="w-4 h-4 mr-1.5"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+                    />
+                </svg>
+                Back to Waitlist
+            </a>
 
-        <div class="bg-white rounded-3xl border border-gray-100 p-8 shadow-md">
-            
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <div class="w-12 h-12 bg-[#2E2E2E] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="white" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold tracking-tight text-black">LockdSync</h1>
-                <p id="mode-subtitle" class="text-sm text-gray-400 mt-1">Sync plans, lock down schedules.</p>
-            </div>
-
-            <!-- Tabs -->
-            <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
-                <button type="button" id="tab-login" class="flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all cursor-pointer">Log In</button>
-                <button type="button" id="tab-signup" class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all cursor-pointer">Register</button>
-            </div>
-
-            <!-- Auth Form -->
-            <form id="auth-form" class="space-y-5">
-                
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Username</label>
-                    <input id="username" type="text" placeholder="e.g. skyler_sync" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition bg-gray-50/50" />
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Password</label>
-                    <input id="password" type="password" placeholder="••••••••" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition bg-gray-50/50" />
-                </div>
-
-                <div id="profile-key-container" class="hidden">
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Your Profile Key</label>
-                    <div class="flex gap-2">
-                        <input id="profile-key" type="text" readonly class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-100 text-gray-800 font-mono tracking-wider font-semibold text-center text-sm outline-none" />
-                        <button type="button" id="regen-key" class="shrink-0 px-4 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100 transition cursor-pointer" title="Generate a new key">
-                            New
-                        </button>
+            <div
+                class="bg-white rounded-3xl border border-gray-100 p-8 shadow-md"
+            >
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div
+                        class="w-12 h-12 bg-[#2E2E2E] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2.5"
+                            stroke="white"
+                            class="w-6 h-6"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
+                            />
+                        </svg>
                     </div>
-                    <p class="text-[11px] text-amber-600 mt-2 leading-relaxed bg-amber-50 p-2.5 rounded-lg border border-amber-100">
-                        ℹ️ Keep this key handy! Friends will use this 12-letter code to add you to their hangouts.
+                    <h1 class="text-2xl font-bold tracking-tight text-black">
+                        LockdSync
+                    </h1>
+                    <p id="mode-subtitle" class="text-sm text-gray-400 mt-1">
+                        Sync plans, lock down schedules.
                     </p>
                 </div>
-                
-                <!-- Error Message Display -->
-                <div id="error-msg-container" class="hidden mt-4">
-                    <p id="error-msg" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3 text-center font-medium"></p>
+
+                <!-- Tabs -->
+                <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
+                    <button
+                        type="button"
+                        id="tab-login"
+                        onclick="setMode('login')"
+                        class="flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all cursor-pointer"
+                    >
+                        Log In
+                    </button>
+                    <button
+                        type="button"
+                        id="tab-signup"
+                        onclick="setMode('signup')"
+                        class="flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all cursor-pointer"
+                    >
+                        Register
+                    </button>
                 </div>
 
-                <button type="submit" id="submit-btn" class="w-full bg-[#2E2E2E] hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 shadow-md mt-6 cursor-pointer">
-                    Log In
-                </button>
-            </form>
+                <!-- Auth Form -->
+                <form id="auth-form" class="space-y-5">
+                    <!-- Username Field -->
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+                            >Username</label
+                        >
+                        <input
+                            id="username"
+                            type="text"
+                            placeholder="e.g. skyler_sync"
+                            required
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition bg-gray-50/50"
+                        />
+                    </div>
+
+                    <!-- Secret Password Field -->
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+                            >Password</label
+                        >
+                        <input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            required
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition bg-gray-50/50"
+                        />
+                    </div>
+
+                    <!-- Profile Key Field (Hidden on Login, Visible on Register) -->
+                    <div id="profile-key-container" class="hidden">
+                        <label
+                            class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
+                            >Your Profile Key</label
+                        >
+                        <div class="flex gap-2">
+                            <input
+                                id="profile-key"
+                                type="text"
+                                readonly
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-100 text-gray-800 font-mono tracking-wider font-semibold text-center text-sm outline-none"
+                            />
+                            <button
+                                type="button"
+                                id="regen-key"
+                                class="shrink-0 px-4 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+                                title="Generate a new key"
+                            >
+                                New
+                            </button>
+                        </div>
+                        <p
+                            class="text-[11px] text-amber-600 mt-2 leading-relaxed bg-amber-50 p-2.5 rounded-lg border border-amber-100"
+                        >
+                            ℹ️ Keep this key handy! Friends will use this
+                            12-letter code to add you to their hangouts.
+                        </p>
+                    </div>
+
+                    <p
+                        id="error-msg"
+                        class="hidden text-sm text-red-600 text-center font-medium mt-2"
+                    ></p>
+
+                    <button
+                        type="submit"
+                        id="submit-btn"
+                        class="w-full bg-[#2E2E2E] hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl transition duration-150 shadow-md mt-6 cursor-pointer"
+                    >
+                        Log In
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Link app.js to use its existing Supabase setup -->
-    <script src="app.js"></script>
-    
-    <script>
-        let isSignup = false;
+        <!-- Supabase CDN and Global App logic -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="app.js"></script>
 
-        // 1. Elements Setup
-        const tabLogin = document.getElementById('tab-login');
-        const tabSignup = document.getElementById('tab-signup');
-        const submitBtn = document.getElementById('submit-btn');
-        const subtitle = document.getElementById('mode-subtitle');
-        const keyContainer = document.getElementById('profile-key-container');
-        const errorContainer = document.getElementById('error-msg-container');
-        const errorMsg = document.getElementById('error-msg');
-        const regenKeyBtn = document.getElementById('regen-key');
-        const profileKeyInput = document.getElementById('profile-key');
+        <script>
+            let isSignup = false;
 
-        // 2. UI Helper Functions
-        function showError(message) {
-            errorMsg.textContent = message;
-            errorContainer.classList.remove('hidden');
-            errorContainer.classList.add('block');
-        }
+            // Auto-redirect if already logged in
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) window.location.href = 'index.html';
+            });
 
-        function hideError() {
-            errorContainer.classList.add('hidden');
-            errorContainer.classList.remove('block');
-        }
-
-        function generateProfileKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let p1 = '', p2 = '', p3 = '';
-            for (let i = 0; i < 4; i++) {
-                p1 += chars.charAt(Math.floor(Math.random() * chars.length));
-                p2 += chars.charAt(Math.floor(Math.random() * chars.length));
-                p3 += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            profileKeyInput.value = `LDS-${p1}-${p2}-${p3}`;
-        }
-
-        function setMode(mode) {
-            isSignup = (mode === 'signup');
-            hideError();
-            
-            if (isSignup) {
-                tabSignup.className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all cursor-pointer';
-                tabLogin.className = 'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all cursor-pointer';
-                submitBtn.textContent = 'Create Profile';
-                subtitle.textContent = 'Claim your username & key to get started.';
-                keyContainer.classList.remove('hidden');
-                
-                if (!profileKeyInput.value) {
-                    generateProfileKey();
+            // Key Generator logic
+            function generateProfileKey() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let p1 = '',
+                    p2 = '',
+                    p3 = '';
+                for (let i = 0; i < 4; i++) {
+                    p1 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
+                    p2 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
+                    p3 += chars.charAt(
+                        Math.floor(Math.random() * chars.length),
+                    );
                 }
-            } else {
-                tabLogin.className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all cursor-pointer';
-                tabSignup.className = 'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all cursor-pointer';
-                submitBtn.textContent = 'Log In';
-                subtitle.textContent = 'Sync plans, lock down schedules.';
-                keyContainer.classList.add('hidden');
+                document.getElementById('profile-key').value =
+                    `LDS-${p1}-${p2}-${p3}`;
             }
-        }
 
-        // 3. Attach Event Listeners
-        tabLogin.addEventListener('click', () => setMode('login'));
-        tabSignup.addEventListener('click', () => setMode('signup'));
-        regenKeyBtn.addEventListener('click', generateProfileKey);
+            document
+                .getElementById('regen-key')
+                .addEventListener('click', generateProfileKey);
 
-        // 4. Form Submission Logic
-        document.getElementById('auth-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            hideError();
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Please wait...';
+            // Tab Switching Logic
+            function setMode(mode) {
+                isSignup = mode === 'signup';
+                document.getElementById('error-msg').classList.add('hidden');
 
-            const rawUsername = document.getElementById('username').value.trim().toLowerCase();
-            const password = document.getElementById('password').value.trim();
-            const profileKey = profileKeyInput.value;
+                const tabLogin = document.getElementById('tab-login');
+                const tabSignup = document.getElementById('tab-signup');
+                const submitBtn = document.getElementById('submit-btn');
+                const subtitle = document.getElementById('mode-subtitle');
+                const keyContainer = document.getElementById(
+                    'profile-key-container',
+                );
 
-            try {
                 if (isSignup) {
-                    // --- REGISTER LOGIC ---
-                    const { data: existingUser, error: checkError } = await supabase
-                        .from('users')
-                        .select('username')
-                        .eq('username', rawUsername)
-                        .maybeSingle(); 
-                    
-                    if (existingUser) {
-                        showError("That username is already taken!");
-                    } else {
-                        const { error: insertError } = await supabase.from('users').insert([{ 
-                            username: rawUsername, 
-                            password: password, 
-                            profile_key: profileKey 
-                        }]);
+                    tabSignup.className =
+                        'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all';
+                    tabLogin.className =
+                        'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all';
+                    submitBtn.textContent = 'Create Profile';
+                    subtitle.textContent =
+                        'Claim your username & key to get started.';
+                    keyContainer.classList.remove('hidden');
 
-                        if (insertError) {
-                            showError("Database error. Did you create the public 'users' table?");
-                        } else {
-                            localStorage.setItem('lockdsync_user', JSON.stringify({ username: rawUsername, profile_key: profileKey }));
-                            window.location.href = 'index.html';
-                            return; 
-                        }
+                    // Auto-generate key if empty
+                    if (!document.getElementById('profile-key').value) {
+                        generateProfileKey();
                     }
                 } else {
-                    // --- LOGIN LOGIC ---
-                    const { data: user, error: loginError } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('username', rawUsername)
-                        .eq('password', password)
-                        .maybeSingle();
-
-                    if (!user || loginError) {
-                        showError("Invalid Username or Password.");
-                    } else {
-                        localStorage.setItem('lockdsync_user', JSON.stringify({ username: user.username, profile_key: user.profile_key }));
-                        window.location.href = 'index.html';
-                        return; 
-                    }
+                    tabLogin.className =
+                        'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all';
+                    tabSignup.className =
+                        'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all';
+                    submitBtn.textContent = 'Log In';
+                    subtitle.textContent = 'Sync plans, lock down schedules.';
+                    keyContainer.classList.add('hidden');
                 }
-            } catch (err) {
-                console.error(err);
-                showError("A connection error occurred. Please try again.");
             }
-            
-            submitBtn.disabled = false;
-            submitBtn.textContent = isSignup ? 'Create Profile' : 'Log In';
-        });
 
-        // Initialize state on load
-        setMode('login');
-    </script>
-</body>
+            // Form Submission
+            document
+                .getElementById('auth-form')
+                .addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const submitBtn = document.getElementById('submit-btn');
+                    const errorMsg = document.getElementById('error-msg');
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Please wait...';
+                    errorMsg.classList.add('hidden');
+
+                    const rawUsername = document
+                        .getElementById('username')
+                        .value.trim()
+                        .toLowerCase();
+                    const password = document
+                        .getElementById('password')
+                        .value.trim();
+                    const profileKey =
+                        document.getElementById('profile-key').value;
+
+                    // Fake email formatting trick to bypass Supabase limits
+                    const fakeEmail = `${rawUsername}@lockdsync.local`;
+
+                    if (isSignup) {
+                        // Register and save Username + Profile Key to Metadata
+                        const { data, error } = await supabase.auth.signUp({
+                            email: fakeEmail,
+                            password: password,
+                            options: {
+                                data: {
+                                    username: rawUsername,
+                                    profile_key: profileKey,
+                                },
+                            },
+                        });
+
+                        if (error) {
+                            errorMsg.textContent = error.message;
+                            errorMsg.classList.remove('hidden');
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    } else {
+                        // Log In (Only needs Username and Password)
+                        const { data, error } =
+                            await supabase.auth.signInWithPassword({
+                                email: fakeEmail,
+                                password: password,
+                            });
+
+                        if (error) {
+                            errorMsg.textContent =
+                                'Invalid Username or Password.';
+                            errorMsg.classList.remove('hidden');
+                        } else {
+                            window.location.href = 'index.html';
+                        }
+                    }
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = isSignup
+                        ? 'Create Profile'
+                        : 'Log In';
+                });
+
+            // Initialize on Login tab
+            setMode('login');
+        </script>
+    </body>
 </html>

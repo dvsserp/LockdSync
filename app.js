@@ -3,45 +3,52 @@ const SUPABASE_URL = 'https://culmoystfpiyiudtfpzw.supabase.co';
 const SUPABASE_ANON_KEY =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1bG1veXN0ZnBpeWl1ZHRmcHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDU2NzIsImV4cCI6MjA5OTI4MTY3Mn0.JedwAdBLb23BUc4Xecs_UXh01Jo6cxsaHw55PSQIe80';
 
-// Initialize the client using the window.supabase object from the CDN
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- GLOBAL AUTHENTICATION CHECK (PUBLIC DB VERSION) ---
-// 1. Grab the user from the browser's local memory
+// --- GLOBAL AUTHENTICATION CHECK ---
 const activeUserString = localStorage.getItem('lockdsync_user');
 const activeUser = activeUserString ? JSON.parse(activeUserString) : null;
-
-// 2. Figure out what page we are currently on
 const currentPage = window.location.pathname.toLowerCase();
-const isPublicPage = currentPage.includes('login') || currentPage.includes('landingpage') || currentPage === '/';
+const isPublicPage =
+    currentPage.includes('login') ||
+    currentPage.includes('landingpage') ||
+    currentPage === '/';
 
-// 3. If there is no active user, and they aren't on a public page, kick them to login
 if (!activeUser && !isPublicPage) {
     window.location.href = 'login.html';
+}
+
+// Helper function to generate clean, readable 6-character unique codes (Format: XXX-XXX)
+function generateUniqueCode() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // Avoids ambiguous characters like O, I, 1, 0
+    let part1 = '';
+    let part2 = '';
+    for (let i = 0; i < 3; i++) {
+        part1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        part2 += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `${part1}-${part2}`;
 }
 
 // --- LOAD HANGOUTS (HOMEPAGE LOGIC) ---
 async function loadHangouts() {
     const container = document.getElementById('hangouts-container');
-
-    // If the container doesn't exist on this page, stop immediately!
     if (!container || !activeUser) return;
 
-    // Fetch ONLY the hangouts belonging to THIS username
+    // Fetch hangouts including the code
     const { data: hangouts, error } = await supabase
         .from('hangouts')
-        .select('id, hangout_name, average_price, hangout_date')
-        .eq('user_id', activeUser.username); // Uses username instead of Supabase ID
+        .select('id, hangout_name, average_price, hangout_date, hangout_code')
+        .eq('user_id', activeUser.username);
 
     if (error) {
         console.error('Error fetching hangouts:', error);
-        container.innerHTML = '<p class="text-center mt-10">Error loading hangouts.</p>';
+        container.innerHTML =
+            '<p class="text-center mt-10">Error loading hangouts.</p>';
         return;
     }
 
-    // Handle the empty state UI
     const emptyState = document.getElementById('empty-state');
-    
     if (hangouts.length === 0) {
         if (emptyState) emptyState.classList.remove('hidden');
         return;
@@ -49,41 +56,44 @@ async function loadHangouts() {
         if (emptyState) emptyState.classList.add('hidden');
     }
 
-    // Generate HTML for each hangout and inject it into the container
+    // Render modern cards matching your exact UI layout
+    container.innerHTML = '';
     hangouts.forEach((hangout) => {
+        const codeDisplay = hangout.hangout_code || 'N/A';
         const cardHTML = `
-        <a href="hangouthome.html?id=${hangout.id}" class="block border border-gray-200 rounded-xl p-5 mb-4 hover:shadow-md transition bg-white shrink-0">
-            <div class="flex justify-between items-start mb-6">
-                <h2 class="text-base font-semibold text-black">${hangout.hangout_name}</h2>
-                <span class="text-xs font-medium text-gray-500">$${hangout.average_price}</span>
-            </div>
-            
-            <div class="flex justify-between items-center">
-                <div class="flex -space-x-2">
-                    <img class="w-7 h-7 rounded-full border-2 border-white object-cover" src="https://i.pravatar.cc/100?img=11" alt="Avatar 1">
-                </div>
-                <span class="text-[10px] font-medium text-gray-400">${hangout.hangout_date}</span>
-            </div>
-        </a>
-        `;
-
+      <a href="hangouthome.html?id=${hangout.id}" class="block border border-gray-200 rounded-2xl p-5 mb-1 hover:shadow-md transition bg-white shrink-0">
+        <div class="flex justify-between items-start mb-6">
+          <div>
+            <h2 class="text-base font-bold text-black">${hangout.hangout_name}</h2>
+            <span class="text-xs text-gray-400 font-medium">${hangout.hangout_date}</span>
+          </div>
+          <span class="text-xs font-semibold tracking-wider text-gray-700 bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-lg">
+            ${codeDisplay}
+          </span>
+        </div>
+        <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+          <span class="text-xs font-medium text-gray-500">Est. Price: <strong class="text-black">$${parseFloat(hangout.average_price).toFixed(2)}</strong></span>
+          <span class="text-xs font-bold text-black flex items-center gap-1">
+            Open Hub
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </span>
+        </div>
+      </a>
+    `;
         container.insertAdjacentHTML('beforeend', cardHTML);
     });
 }
-
-// Run the function when the page loads
 loadHangouts();
 
 // --- CREATE HANGOUT LOGIC ---
 const createForm = document.getElementById('create-hangout-form');
-
 if (createForm) {
     createForm.addEventListener('submit', async function (event) {
         event.preventDefault();
-
         const submitBtn = document.getElementById('submit-btn');
         const errorText = document.getElementById('form-error');
-
         submitBtn.textContent = 'Saving...';
         submitBtn.disabled = true;
         errorText.classList.add('hidden');
@@ -93,20 +103,24 @@ if (createForm) {
         const dateValue = document.getElementById('hangout-date').value;
 
         if (!activeUser) {
-            errorText.textContent = 'You must be logged in to create a hangout.';
+            errorText.textContent =
+                'You must be logged in to create a hangout.';
             errorText.classList.remove('hidden');
             submitBtn.textContent = 'Create Hangout';
             submitBtn.disabled = false;
             return;
         }
 
-        // Insert the new data, attaching the username to the hangout
+        // Generate the unique hangout code directly on creation
+        const uniqueCode = generateUniqueCode();
+
         const { error } = await supabase.from('hangouts').insert([
             {
                 hangout_name: nameValue,
-                average_price: parseFloat(priceValue), 
+                average_price: parseFloat(priceValue),
                 hangout_date: dateValue,
-                user_id: activeUser.username // Saves the username directly
+                user_id: activeUser.username,
+                hangout_code: uniqueCode, // This now works beautifully after SQL update!
             },
         ]);
 
@@ -117,15 +131,15 @@ if (createForm) {
             submitBtn.textContent = 'Create Hangout';
             submitBtn.disabled = false;
         } else {
-            // Success! Send the user straight back to the homepage
             window.location.href = 'index.html';
         }
     });
-} 
+}
 
 // --- HANGOUT HOME PAGE LOGIC ---
 const hangoutTitleDisplay = document.getElementById('hangout-title');
 const leaveHangoutBtn = document.getElementById('leave-hangout-btn');
+const hangoutCodeDisplay = document.getElementById('hangout-code-box');
 
 if (hangoutTitleDisplay) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -136,17 +150,21 @@ if (hangoutTitleDisplay) {
     } else {
         supabase
             .from('hangouts')
-            .select('hangout_name')
+            .select('hangout_name, hangout_code')
             .eq('id', currentHangoutId)
             .single()
             .then(({ data, error }) => {
                 if (error) {
-                    console.error('Failed to load title:', error);
-                    hangoutTitleDisplay.textContent = 'Error Loading Title';
+                    console.error('Failed to load info:', error);
+                    hangoutTitleDisplay.textContent = 'Error Loading Info';
                 } else if (data) {
                     hangoutTitleDisplay.textContent = data.hangout_name;
-
-                    const scheduleLink = document.getElementById('schedule-link');
+                    if (hangoutCodeDisplay) {
+                        hangoutCodeDisplay.textContent =
+                            data.hangout_code || '---';
+                    }
+                    const scheduleLink =
+                        document.getElementById('schedule-link');
                     const messageLink = document.getElementById('message-link');
                     if (scheduleLink)
                         scheduleLink.href = `schedule.html?id=${currentHangoutId}`;
@@ -157,12 +175,12 @@ if (hangoutTitleDisplay) {
 
         if (leaveHangoutBtn) {
             leaveHangoutBtn.addEventListener('click', async () => {
-                const confirmDelete = confirm('Are you sure you want to leave? This will permanently delete the hangout.');
-
+                const confirmDelete = confirm(
+                    'Are you sure you want to leave? This will permanently delete the hangout.',
+                );
                 if (confirmDelete) {
                     leaveHangoutBtn.textContent = 'Leaving...';
                     leaveHangoutBtn.disabled = true;
-
                     const { error } = await supabase
                         .from('hangouts')
                         .delete()
@@ -182,9 +200,23 @@ if (hangoutTitleDisplay) {
     }
 }
 
-// --- SCHEDULE PAGE LOGIC ---
-const scheduleDateDisplay = document.getElementById('schedule-date');
+// Copy-to-Clipboard Code Helper
+window.copyHangoutCode = function () {
+    const codeText = document.getElementById('hangout-code-box')?.textContent;
+    if (codeText && codeText !== '---') {
+        navigator.clipboard
+            .writeText(codeText)
+            .then(() => {
+                alert('Hangout Code copied to clipboard: ' + codeText);
+            })
+            .catch((err) => {
+                console.error('Could not copy text: ', err);
+            });
+    }
+};
 
+// --- REST OF ACTIVITIES / SCHEDULE LOGIC ---
+const scheduleDateDisplay = document.getElementById('schedule-date');
 if (scheduleDateDisplay) {
     const urlParams = new URLSearchParams(window.location.search);
     const hangoutId = urlParams.get('id');
@@ -196,7 +228,6 @@ if (scheduleDateDisplay) {
         if (backBtn) {
             backBtn.href = `hangouthome.html?id=${hangoutId}`;
         }
-
         supabase
             .from('hangouts')
             .select('hangout_date')
@@ -208,31 +239,32 @@ if (scheduleDateDisplay) {
                     scheduleDateDisplay.textContent = 'Error';
                 } else if (data) {
                     const rawDate = new Date(data.hangout_date);
-                    const options = { month: 'long', day: 'numeric', timeZone: 'UTC' };
-                    scheduleDateDisplay.textContent = rawDate.toLocaleDateString('en-US', options);
+                    const options = {
+                        month: 'long',
+                        day: 'numeric',
+                        timeZone: 'UTC',
+                    };
+                    scheduleDateDisplay.textContent =
+                        rawDate.toLocaleDateString('en-US', options);
                 }
             });
     }
 }
 
-// --- CREATE ACTIVITY LOGIC ---
 const createActivityForm = document.getElementById('create-activity-form');
-
 if (createActivityForm) {
     const urlParams = new URLSearchParams(window.location.search);
     const hangoutId = urlParams.get('id');
-    
     const backToScheduleBtn = document.getElementById('back-to-schedule-btn');
+
     if (backToScheduleBtn) {
         backToScheduleBtn.href = `schedule.html?id=${hangoutId}`;
     }
 
     createActivityForm.addEventListener('submit', async function (event) {
         event.preventDefault();
-
         const submitBtn = document.getElementById('submit-activity-btn');
         const errorText = document.getElementById('act-form-error');
-
         submitBtn.textContent = 'Saving...';
         submitBtn.disabled = true;
         errorText.classList.add('hidden');
@@ -264,21 +296,20 @@ if (createActivityForm) {
     });
 }
 
-// --- UPDATE SCHEDULE LOGIC TO LOAD CARDS ---
 const activitiesContainer = document.getElementById('activities-container');
-
 if (activitiesContainer) {
     const urlParams = new URLSearchParams(window.location.search);
     const hangoutId = urlParams.get('id');
-
     const addActivityBtn = document.getElementById('add-activity-btn');
+
     if (addActivityBtn) {
-        addActivityBtn.onclick = () => (window.location.href = `createactivity.html?id=${hangoutId}`);
+        // ROUTING MATCH FIXED: Points to 'createactivities.html' to match your file's exact name
+        addActivityBtn.onclick = () =>
+            (window.location.href = `createactivities.html?id=${hangoutId}`);
     }
 
     async function loadActivities() {
         if (!hangoutId) return;
-
         const { data: activities, error } = await supabase
             .from('activities')
             .select('*')
@@ -291,9 +322,9 @@ if (activitiesContainer) {
         }
 
         activitiesContainer.innerHTML = '';
-
         if (activities.length === 0) {
-            activitiesContainer.innerHTML = '<p class="text-center text-gray-500 mt-10">No activities scheduled yet.</p>';
+            activitiesContainer.innerHTML =
+                '<p class="text-center text-gray-500 mt-10">No activities scheduled yet.</p>';
             return;
         }
 
@@ -301,24 +332,22 @@ if (activitiesContainer) {
             const [hours, minutes] = act.activity_time.split(':');
             let h = parseInt(hours);
             const ampm = h >= 12 ? 'pm' : 'am';
-            h = h % 12 || 12; 
+            h = h % 12 || 12;
             const displayTime = `${h}:${minutes} ${ampm}`;
-
             const cardHTML = `
-            <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm mb-4">
-              <div class="flex justify-between items-center mb-6">
-                <span class="text-lg text-gray-900">${act.activity_name}</span>
-                <span class="text-lg text-gray-900">$${act.price}</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="text-base text-gray-900">${displayTime}</span>
-                <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">${act.location}</span>
-              </div>
-            </div>
-            `;
+        <div class="border border-gray-300 rounded-xl p-4 bg-white shadow-sm mb-4">
+          <div class="flex justify-between items-center mb-6">
+            <span class="text-lg text-gray-900">${act.activity_name}</span>
+            <span class="text-lg text-gray-900">$${act.price}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-base text-gray-900">${displayTime}</span>
+            <span class="text-sm text-gray-900 underline decoration-solid underline-offset-2 cursor-pointer">${act.location}</span>
+          </div>
+        </div>
+      `;
             activitiesContainer.insertAdjacentHTML('beforeend', cardHTML);
         });
     }
-
     loadActivities();
 }

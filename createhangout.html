@@ -60,6 +60,7 @@
                         placeholder="e.g. Dinner & Movie"
                     />
                 </div>
+
                 <div>
                     <label
                         for="hangout-price"
@@ -75,6 +76,7 @@
                         placeholder="0.00"
                     />
                 </div>
+
                 <div>
                     <label
                         for="hangout-date"
@@ -88,6 +90,7 @@
                         class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition"
                     />
                 </div>
+
                 <button
                     type="submit"
                     id="submit-btn"
@@ -102,37 +105,6 @@
             </form>
         </main>
 
-        <script>
-            // Generator function for a completely unique Hangout Code (Format: XXX-XXX)
-            function generateUniqueCode() {
-                const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // Clean set (no ambiguous O, I, 1, 0)
-                let part1 = '';
-                let part2 = '';
-                for (let i = 0; i < 3; i++) {
-                    part1 += chars.charAt(
-                        Math.floor(Math.random() * chars.length),
-                    );
-                    part2 += chars.charAt(
-                        Math.floor(Math.random() * chars.length),
-                    );
-                }
-                return `${part1}-${part2}`;
-            }
-
-            document
-                .getElementById('create-hangout-form')
-                .addEventListener('submit', function (e) {
-                    // Create a unique code upon creation form submission
-                    const uniqueCode = generateUniqueCode();
-
-                    // Save code dynamically so app.js can intercept it when creating the record in Supabase / Local storage
-                    localStorage.setItem('pending_hangout_code', uniqueCode);
-                    console.log(
-                        'Generated unique code for new hangout: ',
-                        uniqueCode,
-                    );
-                });
-        </script>
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="app.js"></script>
     </body>
