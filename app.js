@@ -6,31 +6,32 @@ const SUPABASE_ANON_KEY =
 // Initialize the client using the window.supabase object from the CDN
 var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- GLOBAL AUTHENTICATION CHECK ---
-supabase.auth.getSession().then(({ data: { session } }) => {
-    // If there is no active session, and they aren't already on the login page, redirect them
-    if (!session && !window.location.pathname.includes('login.html')) {
-        window.location.href = 'login.html';
-    }
-});
+// --- GLOBAL AUTHENTICATION CHECK (PUBLIC DB VERSION) ---
+// 1. Grab the user from the browser's local memory
+const activeUserString = localStorage.getItem('lockdsync_user');
+const activeUser = activeUserString ? JSON.parse(activeUserString) : null;
+
+// 2. Figure out what page we are currently on
+const currentPage = window.location.pathname.toLowerCase();
+const isPublicPage = currentPage.includes('login') || currentPage.includes('landingpage') || currentPage === '/';
+
+// 3. If there is no active user, and they aren't on a public page, kick them to login
+if (!activeUser && !isPublicPage) {
+    window.location.href = 'login.html';
+}
 
 // --- LOAD HANGOUTS (HOMEPAGE LOGIC) ---
 async function loadHangouts() {
     const container = document.getElementById('hangouts-container');
 
     // If the container doesn't exist on this page, stop immediately!
-    if (!container) return;
+    if (!container || !activeUser) return;
 
-    // Fetch the currently logged-in user
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) return; // Prevent errors if redirecting
-
-    // Fetch ONLY the hangouts belonging to this user
+    // Fetch ONLY the hangouts belonging to THIS username
     const { data: hangouts, error } = await supabase
         .from('hangouts')
         .select('id, hangout_name, average_price, hangout_date')
-        .eq('user_id', user.id);
+        .eq('user_id', activeUser.username); // Uses username instead of Supabase ID
 
     if (error) {
         console.error('Error fetching hangouts:', error);
@@ -42,11 +43,9 @@ async function loadHangouts() {
     const emptyState = document.getElementById('empty-state');
     
     if (hangouts.length === 0) {
-        // Show empty state if no hangouts
         if (emptyState) emptyState.classList.remove('hidden');
         return;
     } else {
-        // Hide empty state if we have data to show
         if (emptyState) emptyState.classList.add('hidden');
     }
 
@@ -93,10 +92,7 @@ if (createForm) {
         const priceValue = document.getElementById('hangout-price').value;
         const dateValue = document.getElementById('hangout-date').value;
 
-        // Get the logged-in user
-        const { data: { user } } = await supabase.auth.getUser();
-
-        if (!user) {
+        if (!activeUser) {
             errorText.textContent = 'You must be logged in to create a hangout.';
             errorText.classList.remove('hidden');
             submitBtn.textContent = 'Create Hangout';
@@ -104,13 +100,13 @@ if (createForm) {
             return;
         }
 
-        // Insert the new data, including the user_id
+        // Insert the new data, attaching the username to the hangout
         const { error } = await supabase.from('hangouts').insert([
             {
                 hangout_name: nameValue,
                 average_price: parseFloat(priceValue), 
                 hangout_date: dateValue,
-                user_id: user.id
+                user_id: activeUser.username // Saves the username directly
             },
         ]);
 
@@ -138,7 +134,6 @@ if (hangoutTitleDisplay) {
     if (!currentHangoutId) {
         hangoutTitleDisplay.textContent = 'Hangout Not Found';
     } else {
-        // Fetch the title safely
         supabase
             .from('hangouts')
             .select('hangout_name')
@@ -160,7 +155,6 @@ if (hangoutTitleDisplay) {
                 }
             });
 
-        // Setup the Leave/Delete Button Logic
         if (leaveHangoutBtn) {
             leaveHangoutBtn.addEventListener('click', async () => {
                 const confirmDelete = confirm('Are you sure you want to leave? This will permanently delete the hangout.');
@@ -214,15 +208,8 @@ if (scheduleDateDisplay) {
                     scheduleDateDisplay.textContent = 'Error';
                 } else if (data) {
                     const rawDate = new Date(data.hangout_date);
-
-                    const options = {
-                        month: 'long',
-                        day: 'numeric',
-                        timeZone: 'UTC',
-                    };
-                    const formattedDate = rawDate.toLocaleDateString('en-US', options);
-
-                    scheduleDateDisplay.textContent = formattedDate;
+                    const options = { month: 'long', day: 'numeric', timeZone: 'UTC' };
+                    scheduleDateDisplay.textContent = rawDate.toLocaleDateString('en-US', options);
                 }
             });
     }
@@ -286,8 +273,7 @@ if (activitiesContainer) {
 
     const addActivityBtn = document.getElementById('add-activity-btn');
     if (addActivityBtn) {
-        addActivityBtn.onclick = () =>
-            (window.location.href = `createactivity.html?id=${hangoutId}`);
+        addActivityBtn.onclick = () => (window.location.href = `createactivity.html?id=${hangoutId}`);
     }
 
     async function loadActivities() {
@@ -307,8 +293,7 @@ if (activitiesContainer) {
         activitiesContainer.innerHTML = '';
 
         if (activities.length === 0) {
-            activitiesContainer.innerHTML =
-                '<p class="text-center text-gray-500 mt-10">No activities scheduled yet.</p>';
+            activitiesContainer.innerHTML = '<p class="text-center text-gray-500 mt-10">No activities scheduled yet.</p>';
             return;
         }
 
@@ -337,11 +322,3 @@ if (activitiesContainer) {
 
     loadActivities();
 }
-
-// --- GLOBAL AUTHENTICATION CHECK ---
-supabase.auth.getSession().then(({ data: { session } }) => {
-    // Redirect to login if no session AND they aren't on the login OR landing page
-    if (!session && !window.location.pathname.includes('login.html') && !window.location.pathname.includes('landingpage.html')) {
-        window.location.href = 'login.html';
-    }
-});

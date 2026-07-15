@@ -104,13 +104,16 @@
 
         <!-- Logout Logic -->
         <script>
-            document.getElementById('logout-btn').addEventListener('click', async () => {
+            document.getElementById('logout-btn').addEventListener('click', () => {
                 const btn = document.getElementById('logout-btn');
                 btn.textContent = "Signing out...";
                 btn.disabled = true;
 
-                await supabase.auth.signOut();
-                window.location.href = 'login.html';
+                // Delete the user from the browser memory
+                localStorage.removeItem('lockdsync_user');
+                
+                // Send them back to the waitlist
+                window.location.href = 'landingpage.html';
             });
         </script>
     </body>
