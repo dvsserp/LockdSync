@@ -19,7 +19,6 @@
         class="bg-[#fafafa] min-h-screen flex flex-col justify-center items-center px-4 text-gray-900 antialiased"
     >
         <div class="w-full max-w-md">
-            <!-- Back Button -->
             <a
                 href="landingpage.html"
                 class="inline-flex items-center text-sm font-medium text-gray-400 hover:text-black transition mb-6"
@@ -40,11 +39,9 @@
                 </svg>
                 Back to Waitlist
             </a>
-
             <div
                 class="bg-white rounded-3xl border border-gray-100 p-8 shadow-md"
             >
-                <!-- Header -->
                 <div class="text-center mb-8">
                     <div
                         class="w-12 h-12 bg-[#2E2E2E] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm"
@@ -71,8 +68,6 @@
                         Sync plans, lock down schedules.
                     </p>
                 </div>
-
-                <!-- Tabs -->
                 <div class="flex bg-gray-100 p-1 rounded-xl mb-6">
                     <button
                         type="button"
@@ -91,10 +86,7 @@
                         Register
                     </button>
                 </div>
-
-                <!-- Auth Form -->
                 <form id="auth-form" class="space-y-5">
-                    <!-- Username Field -->
                     <div>
                         <label
                             class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
@@ -108,8 +100,6 @@
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition bg-gray-50/50"
                         />
                     </div>
-
-                    <!-- Secret Password Field -->
                     <div>
                         <label
                             class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
@@ -123,8 +113,6 @@
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-black focus:ring-1 focus:ring-black focus:outline-none transition bg-gray-50/50"
                         />
                     </div>
-
-                    <!-- Profile Key Field (Hidden on Login, Visible on Register) -->
                     <div id="profile-key-container" class="hidden">
                         <label
                             class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2"
@@ -153,12 +141,10 @@
                             12-letter code to add you to their hangouts.
                         </p>
                     </div>
-
                     <p
                         id="error-msg"
                         class="hidden text-sm text-red-600 text-center font-medium mt-2"
                     ></p>
-
                     <button
                         type="submit"
                         id="submit-btn"
@@ -169,18 +155,30 @@
                 </form>
             </div>
         </div>
-
-        <!-- Supabase CDN and Global App logic -->
         <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
         <script src="app.js"></script>
-
         <script>
             let isSignup = false;
 
-            // Auto-redirect if already logged in
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) window.location.href = 'index.html';
-            });
+            // Check localStorage instead of Supabase Auth Session
+            const existingUser = localStorage.getItem('lockdsync_user');
+            if (existingUser) {
+                window.location.href = 'index.html';
+            }
+
+            // SHA-256 Hashing Helper function using browser SubtleCrypto
+            async function hashPassword(password) {
+                const msgBuffer = new TextEncoder().encode(password);
+                const hashBuffer = await crypto.subtle.digest(
+                    'SHA-256',
+                    msgBuffer,
+                );
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray
+                    .map((b) => b.toString(16).padStart(2, '0'))
+                    .join('');
+                return hashHex;
+            }
 
             // Key Generator logic
             function generateProfileKey() {
@@ -211,7 +209,6 @@
             function setMode(mode) {
                 isSignup = mode === 'signup';
                 document.getElementById('error-msg').classList.add('hidden');
-
                 const tabLogin = document.getElementById('tab-login');
                 const tabSignup = document.getElementById('tab-signup');
                 const submitBtn = document.getElementById('submit-btn');
@@ -229,8 +226,6 @@
                     subtitle.textContent =
                         'Claim your username & key to get started.';
                     keyContainer.classList.remove('hidden');
-
-                    // Auto-generate key if empty
                     if (!document.getElementById('profile-key').value) {
                         generateProfileKey();
                     }
@@ -245,15 +240,28 @@
                 }
             }
 
-            // Form Submission
+            // Establish Pseudo-session in localStorage
+            function establishSession(userRecord) {
+                // Construct the user object expected by app.js global auth check
+                const userSessionObject = {
+                    id: userRecord.id,
+                    username: userRecord.username,
+                    profile_key: userRecord.profile_key,
+                };
+                localStorage.setItem(
+                    'lockdsync_user',
+                    JSON.stringify(userSessionObject),
+                );
+                window.location.href = 'index.html';
+            }
+
+            // Custom Form Submission Logic using Public Database Auth
             document
                 .getElementById('auth-form')
                 .addEventListener('submit', async (e) => {
                     e.preventDefault();
-
                     const submitBtn = document.getElementById('submit-btn');
                     const errorMsg = document.getElementById('error-msg');
-
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Please wait...';
                     errorMsg.classList.add('hidden');
@@ -268,49 +276,66 @@
                     const profileKey =
                         document.getElementById('profile-key').value;
 
-                    // Fake email formatting trick to bypass Supabase limits
-                    const fakeEmail = `${rawUsername}@lockdsync.local`;
+                    try {
+                        // ALWAYS HASH THE PASSWORD
+                        const currentPasswordHash =
+                            await hashPassword(password);
 
-                    if (isSignup) {
-                        // Register and save Username + Profile Key to Metadata
-                        const { data, error } = await supabase.auth.signUp({
-                            email: fakeEmail,
-                            password: password,
-                            options: {
-                                data: {
-                                    username: rawUsername,
-                                    profile_key: profileKey,
-                                },
-                            },
-                        });
+                        if (isSignup) {
+                            // Bypass Supabase Auth, insert directly into custom public table
+                            const { data, error } = await supabase
+                                .from('users_prototype')
+                                .insert([
+                                    {
+                                        username: rawUsername,
+                                        password_hash: currentPasswordHash,
+                                        profile_key: profileKey,
+                                    },
+                                ])
+                                .select()
+                                .single();
 
-                        if (error) {
-                            errorMsg.textContent = error.message;
-                            errorMsg.classList.remove('hidden');
+                            if (error) {
+                                if (error.code === '23505') {
+                                    // Postgres code for unique violation
+                                    throw new Error('Username already taken.');
+                                }
+                                throw new Error(error.message);
+                            } else {
+                                // Success: Login by setting localStorage pseudo-session
+                                establishSession(data);
+                            }
                         } else {
-                            window.location.href = 'index.html';
-                        }
-                    } else {
-                        // Log In (Only needs Username and Password)
-                        const { data, error } =
-                            await supabase.auth.signInWithPassword({
-                                email: fakeEmail,
-                                password: password,
-                            });
+                            // Custom Log In: Query direct from custom public table
+                            const { data, error } = await supabase
+                                .from('users_prototype')
+                                .select(
+                                    'id, username, password_hash, profile_key',
+                                )
+                                .eq('username', rawUsername)
+                                .eq('password_hash', currentPasswordHash) // Match hashed passwords
+                                .maybeSingle();
 
-                        if (error) {
-                            errorMsg.textContent =
-                                'Invalid Username or Password.';
-                            errorMsg.classList.remove('hidden');
-                        } else {
-                            window.location.href = 'index.html';
+                            if (error) throw new Error(error.message);
+
+                            if (data) {
+                                // Success: Match found
+                                establishSession(data);
+                            } else {
+                                // No match or wrong password
+                                throw new Error(
+                                    'Invalid Username or Password.',
+                                );
+                            }
                         }
+                    } catch (catchError) {
+                        errorMsg.textContent = catchError.message;
+                        errorMsg.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = isSignup
+                            ? 'Create Profile'
+                            : 'Log In';
                     }
-
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = isSignup
-                        ? 'Create Profile'
-                        : 'Log In';
                 });
 
             // Initialize on Login tab
