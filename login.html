@@ -175,146 +175,129 @@
         <script src="app.js"></script>
 
         <script>
-            let isSignup = false;
+ // Remove the duplicate Supabase initialization if app.js is loaded above this!
+let isSignup = false;
 
-            // Auto-redirect if already logged in
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) window.location.href = 'index.html';
-            });
+// 1. Elements Setup
+const tabLogin = document.getElementById('tab-login');
+const tabSignup = document.getElementById('tab-signup');
+const submitBtn = document.getElementById('submit-btn');
+const subtitle = document.getElementById('mode-subtitle');
+const keyContainer = document.getElementById('profile-key-container');
+const errorMsg = document.getElementById('error-msg');
+const regenKeyBtn = document.getElementById('regen-key');
+const profileKeyInput = document.getElementById('profile-key');
 
-            // Key Generator logic
-            function generateProfileKey() {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let p1 = '',
-                    p2 = '',
-                    p3 = '';
-                for (let i = 0; i < 4; i++) {
-                    p1 += chars.charAt(
-                        Math.floor(Math.random() * chars.length),
-                    );
-                    p2 += chars.charAt(
-                        Math.floor(Math.random() * chars.length),
-                    );
-                    p3 += chars.charAt(
-                        Math.floor(Math.random() * chars.length),
-                    );
-                }
-                document.getElementById('profile-key').value =
-                    `LDS-${p1}-${p2}-${p3}`;
-            }
+// 2. UI Helper Functions
+function generateProfileKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let p1 = '', p2 = '', p3 = '';
+    for (let i = 0; i < 4; i++) {
+        p1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        p3 += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    profileKeyInput.value = `LDS-${p1}-${p2}-${p3}`;
+}
 
-            document
-                .getElementById('regen-key')
-                .addEventListener('click', generateProfileKey);
+function setMode(mode) {
+    isSignup = (mode === 'signup');
+    errorMsg.classList.add('hidden');
+    
+    if (isSignup) {
+        tabSignup.className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all cursor-pointer';
+        tabLogin.className = 'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all cursor-pointer';
+        submitBtn.textContent = 'Create Profile';
+        subtitle.textContent = 'Claim your username & key to get started.';
+        keyContainer.classList.remove('hidden');
+        
+        if (!profileKeyInput.value) {
+            generateProfileKey();
+        }
+    } else {
+        tabLogin.className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all cursor-pointer';
+        tabSignup.className = 'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all cursor-pointer';
+        submitBtn.textContent = 'Log In';
+        subtitle.textContent = 'Sync plans, lock down schedules.';
+        keyContainer.classList.add('hidden');
+    }
+}
 
-            // Tab Switching Logic
-            function setMode(mode) {
-                isSignup = mode === 'signup';
-                document.getElementById('error-msg').classList.add('hidden');
+// 3. Attach Event Listeners
+tabLogin.addEventListener('click', () => setMode('login'));
+tabSignup.addEventListener('click', () => setMode('signup'));
+regenKeyBtn.addEventListener('click', generateProfileKey);
 
-                const tabLogin = document.getElementById('tab-login');
-                const tabSignup = document.getElementById('tab-signup');
-                const submitBtn = document.getElementById('submit-btn');
-                const subtitle = document.getElementById('mode-subtitle');
-                const keyContainer = document.getElementById(
-                    'profile-key-container',
-                );
+// 4. Form Submission Logic (BYPASSING AUTH)
+document.getElementById('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.classList.add('hidden');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Please wait...';
 
-                if (isSignup) {
-                    tabSignup.className =
-                        'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all';
-                    tabLogin.className =
-                        'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all';
-                    submitBtn.textContent = 'Create Profile';
-                    subtitle.textContent =
-                        'Claim your username & key to get started.';
-                    keyContainer.classList.remove('hidden');
+    const rawUsername = document.getElementById('username').value.trim().toLowerCase();
+    const password = document.getElementById('password').value.trim();
+    const profileKey = profileKeyInput.value;
 
-                    // Auto-generate key if empty
-                    if (!document.getElementById('profile-key').value) {
-                        generateProfileKey();
-                    }
+    try {
+        if (isSignup) {
+            // --- REGISTER LOGIC (Direct to public table) ---
+            const { data: existingUser, error: checkError } = await supabase
+                .from('users')
+                .select('username')
+                .eq('username', rawUsername)
+                .maybeSingle(); 
+            
+            if (existingUser) {
+                errorMsg.textContent = "That username is already taken!";
+                errorMsg.classList.remove('hidden');
+            } else {
+                const { error: insertError } = await supabase.from('users').insert([{ 
+                    username: rawUsername, 
+                    password: password, 
+                    profile_key: profileKey 
+                }]);
+
+                if (insertError) {
+                    errorMsg.textContent = "Database error. Check your 'users' table columns!";
+                    errorMsg.classList.remove('hidden');
                 } else {
-                    tabLogin.className =
-                        'flex-1 py-2 text-sm font-semibold rounded-lg text-black bg-white shadow-sm transition-all';
-                    tabSignup.className =
-                        'flex-1 py-2 text-sm font-medium rounded-lg text-gray-500 hover:text-black transition-all';
-                    submitBtn.textContent = 'Log In';
-                    subtitle.textContent = 'Sync plans, lock down schedules.';
-                    keyContainer.classList.add('hidden');
+                    localStorage.setItem('lockdsync_user', JSON.stringify({ username: rawUsername, profile_key: profileKey }));
+                    window.location.href = 'index.html';
+                    return; 
                 }
             }
+        } else {
+            // --- LOGIN LOGIC (Direct to public table) ---
+            const { data: user, error: loginError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('username', rawUsername)
+                .eq('password', password)
+                .maybeSingle();
 
-            // Form Submission
-            document
-                .getElementById('auth-form')
-                .addEventListener('submit', async (e) => {
-                    e.preventDefault();
+            if (!user || loginError) {
+                errorMsg.textContent = "Invalid Username or Password.";
+                errorMsg.classList.remove('hidden');
+            } else {
+                localStorage.setItem('lockdsync_user', JSON.stringify({ username: user.username, profile_key: user.profile_key }));
+                window.location.href = 'index.html';
+                return; 
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        errorMsg.textContent = "A connection error occurred. Please try again.";
+        errorMsg.classList.remove('hidden');
+    }
+    
+    submitBtn.disabled = false;
+    submitBtn.textContent = isSignup ? 'Create Profile' : 'Log In';
+});
 
-                    const submitBtn = document.getElementById('submit-btn');
-                    const errorMsg = document.getElementById('error-msg');
-
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Please wait...';
-                    errorMsg.classList.add('hidden');
-
-                    const rawUsername = document
-                        .getElementById('username')
-                        .value.trim()
-                        .toLowerCase();
-                    const password = document
-                        .getElementById('password')
-                        .value.trim();
-                    const profileKey =
-                        document.getElementById('profile-key').value;
-
-                    // Fake email formatting trick to bypass Supabase limits
-                    const fakeEmail = `${rawUsername}@lockdsync.local`;
-
-                    if (isSignup) {
-                        // Register and save Username + Profile Key to Metadata
-                        const { data, error } = await supabase.auth.signUp({
-                            email: fakeEmail,
-                            password: password,
-                            options: {
-                                data: {
-                                    username: rawUsername,
-                                    profile_key: profileKey,
-                                },
-                            },
-                        });
-
-                        if (error) {
-                            errorMsg.textContent = error.message;
-                            errorMsg.classList.remove('hidden');
-                        } else {
-                            window.location.href = 'index.html';
-                        }
-                    } else {
-                        // Log In (Only needs Username and Password)
-                        const { data, error } =
-                            await supabase.auth.signInWithPassword({
-                                email: fakeEmail,
-                                password: password,
-                            });
-
-                        if (error) {
-                            errorMsg.textContent =
-                                'Invalid Username or Password.';
-                            errorMsg.classList.remove('hidden');
-                        } else {
-                            window.location.href = 'index.html';
-                        }
-                    }
-
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = isSignup
-                        ? 'Create Profile'
-                        : 'Log In';
-                });
-
-            // Initialize on Login tab
-            setMode('login');
+// Initialize state on load
+setMode('login');
         </script>
     </body>
 </html>
