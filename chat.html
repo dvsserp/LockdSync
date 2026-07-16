@@ -8,6 +8,7 @@
         <style>
             :root {
                 --streak-color: #9e9e9e; /* Default gray theme for 0 streak */
+                --partner-streak-color: #9e9e9e; /* Default gray theme for partner 0 streak */
             }
 
             /* --- STRUCTURE & LAYOUT --- */
@@ -95,14 +96,14 @@
                 margin: 0;
                 font-size: 22px;
                 font-weight: bold;
-                color: #333333; /* Changed to dark gray for high readability */
+                color: #333333;
             }
 
             .header-text h3 {
                 margin: 5px 0 0;
                 font-size: 18px;
                 font-weight: normal;
-                color: #333333; /* Updated to dark gray */
+                color: #333333;
             }
 
             /* --- DYNAMIC STREAK FLAMES --- */
@@ -167,17 +168,30 @@
                 flex-direction: column;
                 gap: 12px;
                 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                max-height: 85%;
+                overflow-y: auto;
             }
 
             .modal-content h3 {
                 margin: 0 0 5px 0;
                 font-size: 18px;
             }
-            .modal-content label {
+
+            .modal-section-title {
                 font-size: 14px;
-                font-weight: 600;
-                color: #444;
+                font-weight: bold;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 4px;
+                margin-top: 8px;
+                color: #111;
             }
+
+            .modal-content label {
+                font-size: 12px;
+                font-weight: 600;
+                color: #666;
+            }
+
             .modal-content input {
                 padding: 10px;
                 border: 1px solid #ccc;
@@ -231,9 +245,14 @@
                 font-size: 16px;
                 line-height: 1.4;
                 position: relative;
-                color: #000000; /* Crisp black text so messages remain easily readable on light/vibrant background colors */
+                color: #000000;
                 background-color: var(--streak-color);
                 transition: background-color 0.3s ease;
+            }
+
+            /* Left-side messages now pull their custom calculated partner color */
+            .left .bubble {
+                background-color: var(--partner-streak-color);
             }
 
             .bubble::after {
@@ -248,17 +267,19 @@
                 transition: background-color 0.3s ease;
             }
 
+            .left .bubble::after {
+                background-color: var(--partner-streak-color);
+                left: 0;
+            }
+
             .right .bubble::after {
                 right: 0;
-            }
-            .left .bubble::after {
-                left: 0;
             }
 
             .subtext {
                 font-size: 11px;
                 margin-top: 6px;
-                color: #333333; /* Fixed to dark gray instead of tracking the streak theme color directly */
+                color: #333333;
                 font-weight: bold;
                 white-space: pre-line;
                 line-height: 1.3;
@@ -291,19 +312,34 @@
                 transition: border-color 0.3s ease;
             }
 
+            .footer-buttons {
+                display: flex;
+                gap: 10px;
+                width: 90%;
+                justify-content: center;
+            }
+
             .send-btn {
-                background-color: var(--streak-color);
-                color: #333333; /* Changed button text to dark gray for clear definition */
                 border: none;
-                padding: 10px 40px;
+                padding: 10px 0;
                 border-radius: 30px;
-                font-size: 18px;
+                font-size: 15px;
                 cursor: pointer;
-                width: 180px;
+                flex: 1;
                 font-weight: bold;
                 transition:
                     background-color 0.3s ease,
                     filter 0.2s ease;
+            }
+
+            .send-btn.left-btn {
+                background-color: var(--partner-streak-color);
+                color: #333333;
+            }
+
+            .send-btn.right-btn {
+                background-color: var(--streak-color);
+                color: #333333;
             }
 
             .send-btn:hover {
@@ -347,6 +383,10 @@
             <div class="modal-overlay" id="control-modal">
                 <div class="modal-content">
                     <h3>Admin Controls</h3>
+
+                    <div class="modal-section-title">
+                        Your Profile (Right Side)
+                    </div>
                     <label for="admin-streak-input">Streak Number:</label>
                     <input
                         type="number"
@@ -360,6 +400,28 @@
                         type="text"
                         id="admin-title-input"
                         value="Socializer"
+                    />
+
+                    <div class="modal-section-title">
+                        Simulation Partner (Left Side)
+                    </div>
+                    <label for="admin-partner-streak-input"
+                        >Partner Streak Number:</label
+                    >
+                    <input
+                        type="number"
+                        id="admin-partner-streak-input"
+                        value="12"
+                        min="0"
+                    />
+
+                    <label for="admin-partner-title-input"
+                        >Partner Streak Title:</label
+                    >
+                    <input
+                        type="text"
+                        id="admin-partner-title-input"
+                        value="Conversationalist"
                     />
 
                     <button onclick="saveControlSettings()">
@@ -398,7 +460,20 @@
                     class="input-field"
                     placeholder="Type a message..."
                 />
-                <button class="send-btn" onclick="sendMessage()">Send</button>
+                <div class="footer-buttons">
+                    <button
+                        class="send-btn left-btn"
+                        onclick="sendMessage('left')"
+                    >
+                        Send Left
+                    </button>
+                    <button
+                        class="send-btn right-btn"
+                        onclick="sendMessage('right')"
+                    >
+                        Send Right
+                    </button>
+                </div>
             </div>
 
             <div class="bottom-nav">
@@ -489,11 +564,24 @@
             }
 
             /* --- 3. RUNTIME GLOBAL STATE CONFIGURATION --- */
+            // User states
             const storedStreak = localStorage.getItem('global_user_streak');
             let currentStreak =
                 storedStreak !== null ? parseInt(storedStreak) : 0;
             let currentTitle =
                 localStorage.getItem('global_user_title') || 'Socializer';
+
+            // Partner simulation states
+            const storedPartnerStreak = localStorage.getItem(
+                'partner_user_streak',
+            );
+            let partnerStreak =
+                storedPartnerStreak !== null
+                    ? parseInt(storedPartnerStreak)
+                    : 12;
+            let partnerTitle =
+                localStorage.getItem('partner_user_title') ||
+                'Conversationalist';
 
             /* --- 4. COLOR SCALE MANAGEMENT LOGIC --- */
             function getStreakColor(streak) {
@@ -513,10 +601,18 @@
                 document.getElementById('display-streak-title').innerText =
                     `Title: ${currentTitle}`;
 
+                // Only your main streak updates the app frame color theme
                 const targetedHex = getStreakColor(currentStreak);
                 document.documentElement.style.setProperty(
                     '--streak-color',
                     targetedHex,
+                );
+
+                // Dynamically apply separate partner streak color variables
+                const partnerHex = getStreakColor(partnerStreak);
+                document.documentElement.style.setProperty(
+                    '--partner-streak-color',
+                    partnerHex,
                 );
             }
 
@@ -524,20 +620,25 @@
             const modal = document.getElementById('control-modal');
 
             function openControlMenu() {
+                // Populate both User and Partner simulation parameters inside Admin controls
                 document.getElementById('admin-streak-input').value =
                     currentStreak;
                 document.getElementById('admin-title-input').value =
                     currentTitle;
+                document.getElementById('admin-partner-streak-input').value =
+                    partnerStreak;
+                document.getElementById('admin-partner-title-input').value =
+                    partnerTitle;
                 modal.style.display = 'flex';
             }
 
             function saveControlSettings() {
+                // Save User profile configuration
                 currentStreak = parseInt(
                     document.getElementById('admin-streak-input').value,
                 );
                 if (isNaN(currentStreak) || currentStreak < 0)
                     currentStreak = 0;
-
                 currentTitle =
                     document.getElementById('admin-title-input').value ||
                     'Unknown';
@@ -545,25 +646,54 @@
                 localStorage.setItem('global_user_streak', currentStreak);
                 localStorage.setItem('global_user_title', currentTitle);
 
+                // Save Partner simulation configuration
+                partnerStreak = parseInt(
+                    document.getElementById('admin-partner-streak-input').value,
+                );
+                if (isNaN(partnerStreak) || partnerStreak < 0)
+                    partnerStreak = 0;
+                partnerTitle =
+                    document.getElementById('admin-partner-title-input')
+                        .value || 'Unknown';
+
+                localStorage.setItem('partner_user_streak', partnerStreak);
+                localStorage.setItem('partner_user_title', partnerTitle);
+
                 updateUIThemes();
                 modal.style.display = 'none';
                 renderMessages();
             }
 
-            /* --- 6. STORAGE PERSISTENCE --- */
+            /* --- 6. STORAGE & DATABASE PERSISTENCE --- */
             const storageKeyName = hangoutId
                 ? `chatMessages_${hangoutId}`
                 : 'chatMessages_standalone';
 
-            function loadMessages() {
-                let data = localStorage.getItem(storageKeyName);
-                return data ? JSON.parse(data) : [];
+            async function loadMessages() {
+                try {
+                    const filterId = hangoutId || 'standalone';
+                    const { data, error } = await supabaseClient
+                        .from('messages')
+                        .select('text, align')
+                        .eq('hangout_id', filterId)
+                        .order('created_at', { ascending: true });
+
+                    if (error) throw error;
+                    return data || [];
+                } catch (err) {
+                    console.warn(
+                        'Could not fetch from database. Falling back to LocalStorage.',
+                        err,
+                    );
+                    let localData = localStorage.getItem(storageKeyName);
+                    return localData ? JSON.parse(localData) : [];
+                }
             }
 
-            function renderMessages() {
+            async function renderMessages() {
                 const chatBox = document.getElementById('chat-box');
+                const messages = await loadMessages();
                 chatBox.innerHTML = '';
-                const messages = loadMessages();
 
                 messages.forEach((msg) => {
                     const wrapper = document.createElement('div');
@@ -575,7 +705,12 @@
 
                     const subtext = document.createElement('div');
                     subtext.className = 'subtext';
-                    subtext.innerText = `STREAK ${currentStreak}\nTitle: ${currentTitle}`;
+
+                    if (msg.align === 'left') {
+                        subtext.innerText = `STREAK ${partnerStreak}\nTitle: ${partnerTitle}`;
+                    } else {
+                        subtext.innerText = `STREAK ${currentStreak}\nTitle: ${currentTitle}`;
+                    }
 
                     wrapper.appendChild(bubble);
                     wrapper.appendChild(subtext);
@@ -584,21 +719,41 @@
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
 
-            function sendMessage() {
+            async function sendMessage(align = 'right') {
                 const inputField = document.getElementById('message-input');
                 const newText = inputField.value.trim();
                 if (newText === '') return;
 
+                const filterId = hangoutId || 'standalone';
                 const newMessage = {
+                    hangout_id: filterId,
                     text: newText,
-                    align: 'right',
+                    align: align,
                 };
 
-                const messages = loadMessages();
-                messages.push(newMessage);
-                localStorage.setItem(storageKeyName, JSON.stringify(messages));
-
                 inputField.value = '';
+
+                try {
+                    const { error } = await supabaseClient
+                        .from('messages')
+                        .insert([newMessage]);
+
+                    if (error) throw error;
+                } catch (err) {
+                    console.warn(
+                        'Could not save to Supabase. Saving to LocalStorage fallback.',
+                        err,
+                    );
+                    const localMessages = localStorage.getItem(storageKeyName)
+                        ? JSON.parse(localStorage.getItem(storageKeyName))
+                        : [];
+                    localMessages.push({ text: newText, align: align });
+                    localStorage.setItem(
+                        storageKeyName,
+                        JSON.stringify(localMessages),
+                    );
+                }
+
                 renderMessages();
             }
 
@@ -607,9 +762,11 @@
                 .addEventListener('keypress', function (event) {
                     if (event.key === 'Enter') {
                         event.preventDefault();
-                        sendMessage();
+                        sendMessage('right');
                     }
                 });
+
+            setInterval(renderMessages, 3000);
 
             /* --- 7. INITIALIZATION SYSTEM --- */
             fetchHangoutTitle();
