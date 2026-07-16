@@ -8,6 +8,7 @@
         <style>
             :root {
                 --streak-color: #9e9e9e; /* Default gray theme for 0 streak */
+                --partner-streak-color: #9e9e9e; /* Default gray theme for partner 0 streak */
             }
 
             /* --- STRUCTURE & LAYOUT --- */
@@ -249,9 +250,15 @@
                 transition: background-color 0.3s ease;
             }
 
+<<<<<<< HEAD
             /* Left-side messages have a neutral/alternative background style so they don't share the sender's dynamic theme color */
             .left .bubble {
                 background-color: #e0e0e0;
+=======
+            /* Left-side messages now pull their custom calculated partner color */
+            .left .bubble {
+                background-color: var(--partner-streak-color);
+>>>>>>> anthonybranch
             }
 
             .bubble::after {
@@ -267,7 +274,11 @@
             }
 
             .left .bubble::after {
+<<<<<<< HEAD
                 background-color: #e0e0e0;
+=======
+                background-color: var(--partner-streak-color);
+>>>>>>> anthonybranch
                 left: 0;
             }
 
@@ -332,7 +343,11 @@
             }
 
             .send-btn.left-btn {
+<<<<<<< HEAD
                 background-color: #e0e0e0;
+=======
+                background-color: var(--partner-streak-color);
+>>>>>>> anthonybranch
                 color: #333333;
             }
 
@@ -606,6 +621,13 @@
                     '--streak-color',
                     targetedHex,
                 );
+
+                // Dynamically apply separate partner streak color variables
+                const partnerHex = getStreakColor(partnerStreak);
+                document.documentElement.style.setProperty(
+                    '--partner-streak-color',
+                    partnerHex,
+                );
             }
 
             /* --- 5. CONTROL DRAWER MECHANICS --- */
@@ -638,7 +660,11 @@
                 localStorage.setItem('global_user_streak', currentStreak);
                 localStorage.setItem('global_user_title', currentTitle);
 
+<<<<<<< HEAD
                 // Save Partner simulation configuration (does not affect theme styling colors)
+=======
+                // Save Partner simulation configuration
+>>>>>>> anthonybranch
                 partnerStreak = parseInt(
                     document.getElementById('admin-partner-streak-input').value,
                 );
@@ -698,7 +724,10 @@
                     const subtext = document.createElement('div');
                     subtext.className = 'subtext';
 
+<<<<<<< HEAD
                     // Render subtext dynamically based on which direction the bubble is aligned
+=======
+>>>>>>> anthonybranch
                     if (msg.align === 'left') {
                         subtext.innerText = `STREAK ${partnerStreak}\nTitle: ${partnerTitle}`;
                     } else {
